@@ -1,6 +1,6 @@
 read_in_cfactual_obj = function(this_job, reg) {
   is_keras = this_job$model_name == "neural_network"
-  cfactual = readRDS(file.path("cfactuals/prod/registry/results/", paste0(this_job$job.id, ".rds")))
+  cfactual = readRDS(file.path(reg_dir, "results", paste0(this_job$job.id, ".rds")))
   
   if (grepl("run_or_walk_info", this_job$problem, fixed = TRUE)) {
     data_set_name = "run_or_walk_info"
@@ -46,7 +46,6 @@ read_in_cfactual_obj = function(this_job, reg) {
 }
 
 add_results_to_db = function(data_set_name, reg) {
-  reg_dir = "cfactuals/prod/registry"
   reg = loadRegistry(reg_dir, make.default = FALSE)
   job_overview = unwrap(getJobPars(reg = reg))
   jobs_of_this_data_set = job_overview[problem == data_set_name]

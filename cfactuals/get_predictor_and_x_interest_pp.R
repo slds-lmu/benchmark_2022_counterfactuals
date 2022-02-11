@@ -11,7 +11,11 @@ get_predictor_and_x_interest_pp = function(arg_list, job, data) {
   }
   
   if (is_keras) {
-    model_dir = file.path("models/prod/keras", arg_list$model_name)
+    if (TEST) {
+      model_dir = file.path("models/test/keras", arg_list$model_name)
+    } else {
+      model_dir = file.path("models/prod/keras", arg_list$model_name)
+    }
     path_pipeline = file.path(model_dir, paste0(prob_name, "_po.rds"))
     pipeline = readRDS(path_pipeline)
     model_path = file.path(model_dir, paste0(prob_name, "_model.hdf5"))
@@ -40,7 +44,11 @@ get_predictor_and_x_interest_pp = function(arg_list, job, data) {
       type = "prob" 
     )
   } else {
-    model_registry = loadRegistry("models/prod/registry", make.default = FALSE)
+    if (TEST) {
+      model_registry = loadRegistry("models/test/registry_test", make.default = FALSE)
+    } else {
+      model_registry = loadRegistry("models/prod/registry", make.default = FALSE)
+    }
     model_job_params = unwrap(getJobPars(reg = model_registry))  
     job_id = model_job_params[problem == prob_name & algorithm == arg_list$model_name]
     this_model = loadResult(id = job_id, reg = model_registry)
