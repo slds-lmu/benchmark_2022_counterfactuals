@@ -1,7 +1,7 @@
 comp_hv_contr = function(x) {
   if (nrow(x) > 1) {
     res = ecr::computeHVContr(
-      t(rbind(x[, c("dist_target", "dist_train", "nr_changed", "dist_x_interest")])),
+      t(rbind(x[, c("dist_target", "dist_train", "no_changed", "dist_x_interest")])),
       ref.point = as.numeric(x[1L, c("r1", "r2", "r3", "r4")])
     )
   } else {
@@ -23,12 +23,12 @@ add_evals_to_db = function(data_set_name) {
   nice_all = res %>% 
     filter(algorithm  == "nice") %>% 
     group_by(id_x_interest, model_name, optimization) %>% 
-    mutate(rank = dense_rank(desc(nr_changed))) %>% 
+    mutate(rank = dense_rank(desc(no_changed))) %>% 
     arrange(desc(rank)) %>% 
     slice_head(n = 4) %>% 
     ungroup() %>% 
     group_by(id_x_interest, model_name) %>% 
-    arrange(desc(rank), nr_changed) %>% 
+    arrange(desc(rank), no_changed) %>% 
     slice_head(n = 10) %>%
     mutate(algo_spec = paste(algorithm, optimization, sep = "_")) %>% 
     ungroup() %>% 

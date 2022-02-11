@@ -16,7 +16,7 @@ read_in_results = function(data_set_name, reg_dir = "cfactuals/prod/registry") {
 read_in_what_if = function(reg, job_overview, data_set_name) {
   jobs_what_if = job_overview[algorithm == "whatif" & problem == data_set_name]
   res = data.table::rbindlist(lapply(jobs_what_if[["job.id"]], function(x) {
-    res_i = loadResult(x)[, c("dist_x_interest", "nr_changed", "dist_train", "dist_target")]
+    res_i = loadResult(x)[, c("dist_x_interest", "no_changed", "dist_train", "dist_target")]
     res_i[, job.id := x]
     res_i
   }), use.names = TRUE)
@@ -29,7 +29,7 @@ read_in_what_if = function(reg, job_overview, data_set_name) {
 read_in_nice = function(reg, job_overview, data_set_name) {
   jobs_nice = job_overview[algorithm == "nice" & problem == data_set_name]
   res = data.table::rbindlist(lapply(jobs_nice[["job.id"]], function(x) {
-    res_i = loadResult(x)[, c("dist_x_interest", "nr_changed", "dist_train", "dist_target")]
+    res_i = loadResult(x)[, c("dist_x_interest", "no_changed", "dist_train", "dist_target")]
     res_i[, job.id := x]
     res_i
   }), use.names = TRUE)
@@ -42,7 +42,7 @@ read_in_nice = function(reg, job_overview, data_set_name) {
 read_in_moc = function(reg, job_overview, data_set_name) {
   jobs_moc = job_overview[algorithm == "moc" & problem == data_set_name]
   res = data.table::rbindlist(lapply(jobs_moc[["job.id"]], function(x) {
-    res_i = loadResult(x)[, c("dist_x_interest", "nr_changed", "dist_train", "dist_target")]
+    res_i = loadResult(x)[, c("dist_x_interest", "no_changed", "dist_train", "dist_target")]
     res_i[, job.id := x]
     res_i
   }), use.names = TRUE)

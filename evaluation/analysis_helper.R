@@ -6,7 +6,7 @@ plot_comparison = function(data_set_name) {
   res_long = res %>% 
     mutate(model_name = recode(model_name, logistic_regression = "logreg", neural_network = "neuralnet")) %>% 
     pivot_longer(c(dist_x_interest:dist_target, n), names_to = "objective") %>% 
-    mutate(objective = factor(objective, levels = c("dist_target", "dist_x_interest", "nr_changed", "dist_train", "n"))) %>% 
+    mutate(objective = factor(objective, levels = c("dist_target", "dist_x_interest", "no_changed", "dist_train", "n"))) %>% 
     mutate(algo_spec = recode(algo_spec, nice_sparsity = "nice", nice_proximity = "nice", nice_plausibility = "nice"))
   
   if (data_set_name == "diabetis") data_set_name = "diabetes"

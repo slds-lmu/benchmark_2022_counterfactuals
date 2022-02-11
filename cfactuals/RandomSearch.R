@@ -14,7 +14,7 @@ RandomSearch = R6::R6Class("RandomSearch",
       if (is.null(private$ref_point)) {
         stop("There are no results yet. Please run `$find_counterfactuals` first.")
       }
-      obj_names = c("dist_target", "dist_x_interest", "nr_changed", "dist_train")
+      obj_names = c("dist_target", "dist_x_interest", "no_changed", "dist_train")
       folds = rep(seq_len(private$n_generations), each = private$mu)
       candidates_fold = cbind(folds, private$candidates)
 
