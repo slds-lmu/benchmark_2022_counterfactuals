@@ -61,7 +61,8 @@ moc_wrapper = function(data, job, instance, ...) {
   desired_class = names(pred_x_interest)[apply(pred_x_interest, 1L, which.min)]
   
   moc_classif = MOCClassif$new(
-    pred, init_strategy = arg_list$init_strategy, use_conditional_mutator = arg_list$use_conditional_mutator
+    pred, init_strategy = arg_list$init_strategy, use_conditional_mutator = arg_list$use_conditional_mutator,
+    epsilon = 0L
   )
   
   cfactuals = moc_classif$find_counterfactuals(
@@ -84,7 +85,6 @@ random_search_wrapper = function(data, job, instance, ...) {
   library(batchtools)
   library(R6)
   library(data.table)
-  source("cfactuals/RandomSearch.R")
   source("cfactuals/get_predictor_and_x_interest_pp.R")
   
   arg_list = list(...)
@@ -93,7 +93,7 @@ random_search_wrapper = function(data, job, instance, ...) {
   pred_x_interest = pred$predict(x_interest)
   desired_class = names(pred_x_interest)[apply(pred_x_interest, 1L, which.min)]
   
-  rs <- RandomSearch$new(pred)
+  rs <- RandomSearchClassif$new(pred)
   cfactuals <- rs$find_counterfactuals(
     x_interest, desired_class = desired_class, desired_prob = c(0.5 + sqrt(.Machine$double.eps), 1)
   )

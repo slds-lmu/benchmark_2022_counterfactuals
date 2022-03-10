@@ -83,7 +83,6 @@ random_search_wrapper = function(data, job, instance, ...) {
   library(batchtools)
   library(R6)
   library(data.table)
-  source("cfactuals/RandomSearch.R")
   source("cfactuals/get_predictor_and_x_interest_pp.R")
   
   arg_list = list(...)
