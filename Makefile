@@ -4,6 +4,9 @@ get-data:
 train-models:
 	R CMD BATCH models/train_models.R
 
+resubmit-jobs:
+	R CMD BATCH models/resubmit_jobs.R
+
 resample:
 	R CMD BATCH models/resample.R
 
