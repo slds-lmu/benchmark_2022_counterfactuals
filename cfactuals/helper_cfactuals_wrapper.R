@@ -1,11 +1,5 @@
 # WhatIf
 whatif_wrapper = function(data, job, instance, ...) {
-  library(iml)
-  library(counterfactuals)
-  library(keras)
-  library(mlr3)
-  library(batchtools)
-  source("cfactuals/get_predictor_and_x_interest_pp.R")
 
   arg_list = list(...)
   x_interest = readRDS(file.path("data/data_storage/x_interest_list.RDS"))[[job$prob.name]][arg_list$id_x_interest]
@@ -23,12 +17,6 @@ whatif_wrapper = function(data, job, instance, ...) {
 
 # NICE
 nice_wrapper = function(data, job, instance, ...) {
-  library(iml)
-  library(counterfactuals)
-  library(keras)
-  library(mlr3)
-  library(batchtools)
-  source("cfactuals/get_predictor_and_x_interest_pp.R")
 
   arg_list = list(...)
   x_interest = readRDS(file.path("data/data_storage/x_interest_list.RDS"))[[job$prob.name]][arg_list$id_x_interest]
@@ -46,12 +34,6 @@ nice_wrapper = function(data, job, instance, ...) {
 
 # MOC
 moc_wrapper = function(data, job, instance, ...) {
-  library(iml)
-  library(counterfactuals)
-  library(keras)
-  library(mlr3)
-  library(batchtools)
-  source("cfactuals/get_predictor_and_x_interest_pp.R")
   
   arg_list = list(...)
   x_interest = readRDS(file.path("data/data_storage/x_interest_list.RDS"))[[job$prob.name]][arg_list$id_x_interest]
@@ -76,14 +58,6 @@ moc_wrapper = function(data, job, instance, ...) {
 
 # Random Search
 random_search_wrapper = function(data, job, instance, ...) {
-  library(iml)
-  library(counterfactuals)
-  library(keras)
-  library(mlr3)
-  library(batchtools)
-  library(R6)
-  library(data.table)
-  source("cfactuals/get_predictor_and_x_interest_pp.R")
   
   arg_list = list(...)
   x_interest = readRDS(file.path("data/data_storage/x_interest_list.RDS"))[[job$prob.name]][arg_list$id_x_interest]
