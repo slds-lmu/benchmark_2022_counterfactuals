@@ -12,7 +12,7 @@ whatif_wrapper = function(data, job, instance, ...) {
     x_interest, desired_class, desired_prob = c(0.5 + sqrt(.Machine$double.eps), 1)
   )
 
-  cfactuals
+  get_cf_table(cfactuals, job)
 }
 
 # NICE
@@ -29,7 +29,7 @@ nice_wrapper = function(data, job, instance, ...) {
     x_interest, desired_class, desired_prob = c(0.5 + sqrt(.Machine$double.eps), 1)
   )
 
-  cfactuals
+  get_cf_table(cfactuals, job)
 }
 
 # MOC
@@ -43,15 +43,17 @@ moc_wrapper = function(data, job, instance, ...) {
   
   moc_classif = MOCClassif$new(
     pred, init_strategy = arg_list$init_strategy, use_conditional_mutator = arg_list$use_conditional_mutator,
-    epsilon = 0L
+    epsilon = 0L, quiet = TRUE
   )
   
   cfactuals = moc_classif$find_counterfactuals(
     x_interest, desired_class, desired_prob = c(0.5 + sqrt(.Machine$double.eps), 1)
   )
   
-  attr(cfactuals, "dominated_hv") = moc_classif$get_dominated_hv()
-  cfactuals
+  cfactuals_res = get_cf_table(cfactuals, job)
+  attr(cfactuals_res, "dominated_hv") = moc_classif$get_dominated_hv()
+  cfactuals_res
+
 
 }
 
@@ -69,7 +71,26 @@ random_search_wrapper = function(data, job, instance, ...) {
   cfactuals = rs$find_counterfactuals(
     x_interest, desired_class = desired_class, desired_prob = c(0.5 + sqrt(.Machine$double.eps), 1)
   )
-  attr(cfactuals, "dominated_hv") = rs$get_dominated_hv()
-  cfactuals
+  cfactuals_res = get_cf_table(cfactuals, job)
+  attr(cfactuals_res, "dominated_hv") = rs$get_dominated_hv()
+  cfactuals_res
+}
+
+# Function to create results table
+get_cf_table = function(cfactuals_obj, this_job) {
+  if (nrow(cfactuals_obj$data) > 0L) {
+    cfactuals = cfactuals_obj$evaluate()
+    r1 = r2 = r3 = r4 = NA
+    if (this_job$algo.name == "moc") {
+      y_hat_interest = cfactuals_obj$.__enclos_env__$private$predictor$predict(cfactuals_obj$x_interest)[[cfactuals_obj$desired$desired_class]]
+      r1 = min(abs(y_hat_interest - cfactuals_obj$desired$desired_prob))
+      r2 = 1
+      r3 = ncol(cfactuals_obj$x_interest)
+      r4 = 1
+    }
+    dt_standard = cbind(cfactuals, "job.id" = this_job$id,
+                 "r1" = r1, "r2" = r2, "r3" = r3, "r4" = r4)
+  }
+  return(dt_standard)
 }
 

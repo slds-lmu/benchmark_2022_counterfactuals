@@ -9,6 +9,7 @@ TEST = FALSE
 # Setup
 source("cfactuals/libs_cfactuals.R")
 source("cfactuals/helper_cfactuals_wrapper.R")
+source("cfactuals/get_predictor_and_x_interest_pp.R")
 
 if (TEST) {
   source("cfactuals/def_cfactuals_test.R")
