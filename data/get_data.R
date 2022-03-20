@@ -28,7 +28,7 @@ for (i in seq_along(data_ids)) {
   idx_x_interest = sample.int(nrow(oml_data$data), size = 10L)
   oml_data$.__enclos_env__$private$.data[-idx_x_interest, ]
   x_interest_list[[i]] = oml_data$.__enclos_env__$private$.data[idx_x_interest, ]
-  data_list[[i]] = oml_data
+  data_list[[i]] = oml_data$data
 }
 names(data_list) = names(data_ids)
 names(x_interest_list) = names(data_ids)
@@ -40,6 +40,17 @@ if (!dir.exists(dir_name_data_storage)) {
   dir.create(dir_name_data_storage)
 }
 
+hill_valley <- data_list$hill_valley
+cold_idx_10 <- c(sample(ncol(hill_valley)-1, 10), ncol(hill_valley))
+hill_valley_10 <- hill_valley[, ..cold_idx_10]
+cold_idx_30 <- c(sample(ncol(hill_valley)-1, 30), ncol(hill_valley))
+hill_valley_30 <- hill_valley[, ..cold_idx_30]
+data_list <- c(data_list, list("hill_valley_10" = hill_valley_10, "hill_valley_30" = hill_valley_30)) 
 saveRDS(data_list, file.path(dir_name_data_storage, "data_list.RDS"))
+
+x_interest_hill_valley <- x_interest_list$hill_valley
+x_interest_hill_valley_10 <- x_interest_hill_valley[, ..cold_idx_10]
+x_interest_hill_valley_30 <- x_interest_hill_valley[, ..cold_idx_30]
+x_interest_list <- c(x_interest_list, list("hill_valley_10" = x_interest_hill_valley_10, "hill_valley_30" = x_interest_hill_valley_30))
 saveRDS(x_interest_list, file.path(dir_name_data_storage, "x_interest_list.RDS"))
 

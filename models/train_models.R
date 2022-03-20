@@ -43,7 +43,7 @@ if (Sys.info()["sysname"] == "Windows") {
 
 # Add problems
 for (i in seq_along(data_list)) {
-  addProblem(name = names(data_list)[[i]], data = data_list[[i]]$data, seed = 5241541)
+  addProblem(name = names(data_list)[[i]], data = data_list[[i]], seed = 5241541)
 }
 
 # Add algos
