@@ -3,7 +3,6 @@ data_list = readRDS(file.path("data/data_storage/data_list.RDS"))
 data_run_or_walk = data_list$run_or_walk_info$data
 data_list$run_or_walk_info_sub_1 = list(data = data_run_or_walk[sample(.N, ceiling(nrow(data_run_or_walk) * 0.01))])
 data_list$run_or_walk_info_sub_10 = list(data = data_run_or_walk[sample(.N, ceiling(nrow(data_run_or_walk) * 0.1))])
-data_list$hill_valley = NULL # has separate folder hill-valley (together with its subsets)
 
 # ades configurations
 models = c("ranger", "xgboost", "svm", "logistic_regression", "neural_network")
