@@ -78,6 +78,7 @@ random_search_wrapper = function(data, job, instance, ...) {
 
 # Function to create results table
 get_cf_table = function(cfactuals_obj, this_job) {
+  dt_standard = data.table()
   if (nrow(cfactuals_obj$data) > 0L) {
     cfactuals = cfactuals_obj$evaluate()
     r1 = r2 = r3 = r4 = NA
