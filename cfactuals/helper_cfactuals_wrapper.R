@@ -7,7 +7,7 @@ whatif_wrapper = function(data, job, instance, ...) {
   pred_x_interest = pred$predict(x_interest)
   desired_class = names(pred_x_interest)[apply(pred_x_interest, 1L, which.min)]
   
-  whatif_classif = WhatIfClassif$new(pred, arg_list$n_counterfactuals)
+  whatif_classif = WhatIfClassif$new(pred, arg_list$n_counterfactuals, distance_function = "gower_c")
   cfactuals = whatif_classif$find_counterfactuals(
     x_interest, desired_class, desired_prob = c(0.5 + sqrt(.Machine$double.eps), 1)
   )
@@ -24,7 +24,7 @@ nice_wrapper = function(data, job, instance, ...) {
   pred_x_interest = pred$predict(x_interest)
   desired_class = names(pred_x_interest)[apply(pred_x_interest, 1L, which.min)]
   
-  nice_classif = NICEClassif$new(pred, optimization = arg_list$optimization, finish_early = FALSE)
+  nice_classif = NICEClassif$new(pred, optimization = arg_list$optimization, finish_early = FALSE, distance_function = "gower_c")
   cfactuals = nice_classif$find_counterfactuals(
     x_interest, desired_class, desired_prob = c(0.5 + sqrt(.Machine$double.eps), 1)
   )
@@ -43,7 +43,7 @@ moc_wrapper = function(data, job, instance, ...) {
   
   moc_classif = MOCClassif$new(
     pred, init_strategy = arg_list$init_strategy, use_conditional_mutator = arg_list$use_conditional_mutator,
-    epsilon = 0L, quiet = TRUE
+    epsilon = 0L, quiet = TRUE, distance_function = "gower_c"
   )
   
   cfactuals = moc_classif$find_counterfactuals(
@@ -67,7 +67,7 @@ random_search_wrapper = function(data, job, instance, ...) {
   pred_x_interest = pred$predict(x_interest)
   desired_class = names(pred_x_interest)[apply(pred_x_interest, 1L, which.min)]
   
-  rs = RandomSearchClassif$new(pred)
+  rs = RandomSearchClassif$new(pred, distance_function = "gower_c")
   cfactuals = rs$find_counterfactuals(
     x_interest, desired_class = desired_class, desired_prob = c(0.5 + sqrt(.Machine$double.eps), 1)
   )
