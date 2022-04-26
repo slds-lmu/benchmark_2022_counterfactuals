@@ -1,4 +1,4 @@
-plot_comparison = function(data_set_name, methods = c("whatif", "nice", "moc_icecurve_0", "moc_icecurve_1"), savepdf = TRUE) {
+plot_comparison = function(data_set_name, methods = c("whatif", "nice", "moc_icecurve_0", "moc_icecurve_1"), savepdf = FALSE) {
 
   con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
   res = tbl(con, paste0(data_set_name, "_EVAL")) %>% collect()
@@ -40,8 +40,7 @@ plot_comparison = function(data_set_name, methods = c("whatif", "nice", "moc_ice
 }
 
 
-speed_comparison = function(type = "n", methods = c("moc_icecurve_0", "moc_icecurve_1", "moc_random_0", "moc_random_1", 
-                                                    "nice_sparsity", "nice_proximity", "nice_plausibility" , "whatif")) {
+speed_comparison = function(type = "n", methods = c("moc_icecurve_0", "moc_icecurve_1", "nice_sparsity", "nice_proximity", "nice_plausibility" , "whatif")) {
   if (type == "n") {
     data_names = c("run_or_walk_info", "run_or_walk_info_sub_1", "run_or_walk_info_sub_10")
   } else {
@@ -86,8 +85,8 @@ speed_comparison = function(type = "n", methods = c("moc_icecurve_0", "moc_icecu
   df_res
 }
 
-plot_speed_comparison = function(type = "n", methods = c("moc_icecurve_0", "moc_icecurve_1", "moc_random_0", "moc_random_1", 
-                                                         "nice_sparsity", "nice_proximity", "nice_plausibility" , "whatif")) {
+plot_speed_comparison = function(type = "n", methods = c("moc_icecurve_0", "moc_icecurve_1", "nice_sparsity", "nice_proximity", "nice_plausibility" , "whatif"), 
+                                 savepdf = FALSE) {
   
   df_res = speed_comparison(type, methods)
   g = ggplot(df_res) +
@@ -105,7 +104,11 @@ plot_speed_comparison = function(type = "n", methods = c("moc_icecurve_0", "moc_
       plot.margin = margin(t = 1, r = 0, b = 0, l = 0, unit = "pt")
     ) +
     scale_y_continuous(labels = function(x) format(x, big.mark = ",", scientific = FALSE))
-  
+  if (savepdf) {
+    fig.path = "evaluation/figures"
+    dir.create(fig.path, showWarnings = FALSE)
+    ggsave(filename = file.path(fig.path, paste0(paste(type, "runtime", sep = "_"), ".pdf")), plot = g, width = 4, height = 4)
+  }
   g
   
 }
