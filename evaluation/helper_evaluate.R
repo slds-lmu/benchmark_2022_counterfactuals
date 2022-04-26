@@ -1,9 +1,13 @@
 comp_hv_contr = function(x) {
   if (nrow(x) > 1) {
-    res = ecr::computeHVContr(
-      t(rbind(x[, c("dist_target", "dist_train", "no_changed", "dist_x_interest")])),
-      ref.point = as.numeric(x[1L, c("r1", "r2", "r3", "r4")])
-    )
+    if (anyNA(x[, c("r1", "r2", "r3", "r4")])) {
+     res = NA
+    } else {
+      res = ecr::computeHVContr(
+        t(rbind(x[, c("dist_target", "dist_train", "no_changed", "dist_x_interest")])),
+        ref.point = as.numeric(x[1L, c("r1", "r2", "r3", "r4")])
+      )
+    }
   } else {
     res = 1L
   }
@@ -35,7 +39,7 @@ add_evals_to_db = function(data_set_name) {
     group_by(id_x_interest, model_name) %>% 
     group_modify(~ data.frame(cbind(.x, "n" = count(.x))))
   
-  moc_all = res %>% 
+  moc = res %>% 
     filter(algorithm  == "moc") %>% 
     group_by(job.id) %>% 
     group_modify(~ data.frame(cbind(.x, "dom_hv" = comp_hv_contr(.x)))) %>% 
@@ -46,7 +50,23 @@ add_evals_to_db = function(data_set_name) {
     slice_head(n = 10) %>%
     group_modify(~ data.frame(cbind(.x, "n" = count(.x))))
   
-  all_methods = rbindlist(list(whatif, nice_all, moc_all), fill = TRUE)
+  # create lookup from moc for randomsearch for maximum values for hypervolume
+  lookup = res %>% filter(algorithm == "moc" & init_strategy == "random" & use_conditional_mutator == 0) %>% 
+    group_by(id_x_interest, model_name, problem) %>% 
+    summarize(r1 = mean(r1, na.rm = TRUE), r2 = mean(r2, na.rm = TRUE), r3 = mean(r3, na.rm = TRUE), r4 = mean(r4, na.rm = TRUE))
+  
+  randomsearch = res %>% 
+    filter(algorithm  == "random_search") %>% 
+    select(-r1, -r2, -r3, -r4) %>% 
+    left_join(lookup, by = c("model_name", "problem", "id_x_interest")) %>%
+    group_by(job.id) %>% 
+    group_modify(~ data.frame(cbind(.x, "dom_hv" = comp_hv_contr(.x)))) %>% 
+    ungroup() %>% 
+    mutate(algo_spec = "randomsearch") %>% 
+    group_by(id_x_interest, model_name) %>% 
+    group_modify(~ data.frame(cbind(.x, "n" = count(.x))))
+  
+  all_methods = rbindlist(list(whatif, nice_all, moc, randomsearch), fill = TRUE)
   dbWriteTable(con, paste0(toupper(data_set_name), "_EVAL"), all_methods, overwrite = TRUE)
   dbDisconnect(con)
 }

@@ -1,20 +1,27 @@
-plot_comparison = function(data_set_name) {
+plot_comparison = function(data_set_name, methods = c("whatif", "nice", "moc_icecurve_0", "moc_icecurve_1"), savepdf = TRUE) {
+
   con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
   res = tbl(con, paste0(data_set_name, "_EVAL")) %>% collect()
   DBI::dbDisconnect(con)
-
+  
   res_long = res %>% 
     mutate(model_name = recode(model_name, logistic_regression = "logreg", neural_network = "neuralnet")) %>% 
     pivot_longer(c(dist_x_interest:dist_target, n), names_to = "objective") %>% 
     mutate(objective = factor(objective, levels = c("dist_target", "dist_x_interest", "no_changed", "dist_train", "n"))) %>% 
     mutate(algo_spec = recode(algo_spec, nice_sparsity = "nice", nice_proximity = "nice", nice_plausibility = "nice"))
   
+  if (!is.null(methods)) {
+    res_long <- res_long %>% filter(algo_spec %in% methods)
+  }
+  n_colors = length(unique(res_long$algo_spec))
+  
+  
   if (data_set_name == "diabetis") data_set_name = "diabetes"
-  ggplot(res_long) +
+  plt = ggplot(res_long) +
     geom_boxplot(aes(x = algo_spec, y = value, fill = algo_spec), show.legend = FALSE) +
     scale_x_discrete(limits = rev) +
     facet_grid(model_name ~ objective, scales = "free") +
-    scale_fill_manual(values = RColorBrewer::brewer.pal(n = 10, name = "Paired")) +
+    scale_fill_manual(values = RColorBrewer::brewer.pal(n = n_colors, name = "Paired")) +
     theme_bw() +
     coord_flip() +
     ylab("") + xlab("") +
@@ -24,11 +31,17 @@ plot_comparison = function(data_set_name) {
       axis.text = element_text(size = 7),
       panel.spacing = unit(2, "pt")
     )
+  if (savepdf) {
+    fig.path = "evaluation/figures"
+    dir.create(fig.path, showWarnings = FALSE)
+    ggsave(filename = file.path(fig.path, paste0(paste(data_set_name, "obj", sep = "_"), ".pdf")), plot = plt, width = 5.5, height = 3.8)
+  }
+  return(plt)
 }
 
 
 speed_comparison = function(type = "n", methods = c("moc_icecurve_0", "moc_icecurve_1", "moc_random_0", "moc_random_1", 
-                                                     "nice_sparsity", "nice_proximity", "nice_plausibility" , "whatif")) {
+                                                    "nice_sparsity", "nice_proximity", "nice_plausibility" , "whatif")) {
   if (type == "n") {
     data_names = c("run_or_walk_info", "run_or_walk_info_sub_1", "run_or_walk_info_sub_10")
   } else {
@@ -74,7 +87,7 @@ speed_comparison = function(type = "n", methods = c("moc_icecurve_0", "moc_icecu
 }
 
 plot_speed_comparison = function(type = "n", methods = c("moc_icecurve_0", "moc_icecurve_1", "moc_random_0", "moc_random_1", 
-                                                          "nice_sparsity", "nice_proximity", "nice_plausibility" , "whatif")) {
+                                                         "nice_sparsity", "nice_proximity", "nice_plausibility" , "whatif")) {
   
   df_res = speed_comparison(type, methods)
   g = ggplot(df_res) +
