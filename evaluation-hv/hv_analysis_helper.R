@@ -10,7 +10,7 @@ shift_legend_bottom_right = function(p) {
 
 
 
-plot_hv_comparison = function(data_set_names, methods = NULL, savepdf = FALSE) {
+plot_hv_comparison = function(data_set_names, methods = NULL, savepdf = TRUE) {
   con = DBI::dbConnect(RSQLite::SQLite(), "evaluation-hv/db_evals_hv.db")
   res = list()
   for (data_name in c("diabetis", "tic_tac_toe", "credit_g", "run_or_walk_info", "hill_valley", "bank8FM")) {

@@ -6,14 +6,16 @@ library(tidyverse)
 source("evaluation/analysis_helper.R")
 
 p1 = check_cfexp_generated(models = "neural_network")
-# ggsave("evaluation/figures/nn_proportion.pdf", height = 5, width = 8.5, plot = p1)
+# ggsave("evaluation/figures/nn_proportion.pdf", height = 4, width = 5, plot = p1)
 
-plot_comparison("diabetis")
-plot_comparison("tic_tac_toe")
-plot_comparison("credit_g")
-plot_comparison("run_or_walk_info")
-plot_comparison("bank8FM")
-plot_comparison("hill_valley")
+p2 = plot_comparison("diabetis", savepdf = FALSE)
+ggsave(filename = "evaluation/figures/diabetes_obj.pdf", plot = p2, width = 5.5, height = 3.8)
+# plot_comparison("tic_tac_toe")
+p3 = plot_comparison("credit_g", savepdf = FALSE)
+ggsave(filename = "evaluation/figures/credit_g_obj.pdf", plot = p3, width = 5.5, height = 3.8)
+# plot_comparison("run_or_walk_info")
+# plot_comparison("bank8FM")
+# plot_comparison("hill_valley")
 
 all_methods = c("moc_icecurve_0", "moc_icecurve_1", "moc_random_0", "moc_random_1", "moc_sd_0", "moc_sd_1",
                "moc_traindata_0", "moc_traindata_1", "nice" , "whatif")

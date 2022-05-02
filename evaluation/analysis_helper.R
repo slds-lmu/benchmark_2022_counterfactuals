@@ -56,7 +56,7 @@ speed_comparison = function(type = "n", methods = c("moc_icecurve_0", "moc_icecu
       mutate(data_name = data_name)
   }
   DBI::dbDisconnect(con)
-  
+
   df_res = do.call(rbind, res) %>% 
     group_by(id_x_interest, model_name, data_name, algo_spec) %>% 
     summarise(time_running = mean(time_running, na.rm = TRUE))
@@ -64,7 +64,7 @@ speed_comparison = function(type = "n", methods = c("moc_icecurve_0", "moc_icecu
   df_res_nice = df_res %>% 
     filter(algo_spec %in% c("nice_sparsity", "nice_proximity", "nice_plausibility")) %>% 
     group_by(id_x_interest, model_name, data_name) %>% 
-    summarise(time_running = sum(time_running, na.rm = TRUE))  %>% 
+    summarise(time_running = mean(time_running, na.rm = TRUE))  %>% 
     mutate(algo_spec = "nice")
   
   if (type == "n") {
@@ -86,7 +86,7 @@ speed_comparison = function(type = "n", methods = c("moc_icecurve_0", "moc_icecu
 }
 
 plot_speed_comparison = function(type = "n", methods = c("moc_icecurve_0", "moc_icecurve_1", "nice_sparsity", "nice_proximity", "nice_plausibility" , "whatif"), 
-                                 savepdf = FALSE) {
+                                 savepdf = TRUE) {
   
   df_res = speed_comparison(type, methods)
   g = ggplot(df_res) +
@@ -204,6 +204,7 @@ check_cfexp_generated = function(data_set_name, models = NULL) {
               lwd = 1.5,
               linetype = 1) +
     theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) + 
     scale_fill_gradient(low = "white", high = "blue") +
     # facet_wrap(vars(data_name), ncol = 3) +
     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
