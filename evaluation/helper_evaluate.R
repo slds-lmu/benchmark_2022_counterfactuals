@@ -24,18 +24,35 @@ add_evals_to_db = function(data_set_name) {
     group_by(id_x_interest, model_name) %>% 
     group_modify(~ data.frame(cbind(.x, "n" = count(.x))))
   
+  lookup_runtime = res %>% 
+    filter(algorithm  == "nice") %>% 
+    # get overall runtime 
+    group_by(id_x_interest, model_name) %>% 
+    summarise(time_running = sum(unique(time_running), na.rm = TRUE)) %>% 
+    ungroup()
+  
   nice_all = res %>% 
     filter(algorithm  == "nice") %>% 
+    # add overall runtime from lookup
+    select(-time_running) %>%
+    left_join(lookup_runtime, by = c("model_name", "id_x_interest")) %>%
+    # remove duplicates
+    group_by(id_x_interest, model_name) %>% 
+    distinct_at(vars(-job.id, -optimization, -ID, -time_running), .keep_all = TRUE) %>% 
+    ungroup() %>%
+    # only keep 4 counterfactuals per optimizations strategy
     group_by(id_x_interest, model_name, optimization) %>% 
     mutate(rank = dense_rank(desc(no_changed))) %>% 
     arrange(desc(rank)) %>% 
     slice_head(n = 4) %>% 
     ungroup() %>% 
+    # overall only keep 10 per instance & model
     group_by(id_x_interest, model_name) %>% 
     arrange(desc(rank), no_changed) %>% 
     slice_head(n = 10) %>%
     mutate(algo_spec = paste(algorithm, optimization, sep = "_")) %>% 
     ungroup() %>% 
+    # get number of distinct counterfactuals
     group_by(id_x_interest, model_name) %>% 
     group_modify(~ data.frame(cbind(.x, "n" = count(.x))))
   
