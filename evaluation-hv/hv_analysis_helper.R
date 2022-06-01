@@ -10,7 +10,7 @@ shift_legend_bottom_right = function(p) {
 
 
 
-plot_hv_comparison = function(data_set_names, methods = NULL, savepdf = TRUE) {
+plot_hv_comparison = function(data_set_names, methods = NULL, savepdf = TRUE, returntable = FALSE) {
   con = DBI::dbConnect(RSQLite::SQLite(), "evaluation-hv/db_evals_hv.db")
   res = list()
   for (data_name in c("diabetis", "tic_tac_toe", "credit_g", "run_or_walk_info", "hill_valley", "bank8FM")) {
@@ -61,6 +61,9 @@ plot_hv_comparison = function(data_set_names, methods = NULL, savepdf = TRUE) {
   if (!is.null(methods)) {
     df_processed = df_processed %>% filter(algo_spec %in% methods)
   }
+  if (returntable) {
+    return(df_processed)
+  }
   
   p = ggplot(df_processed) +
     geom_smooth(aes(x = generation, y = mean_rank, color = algo_spec), se = FALSE, size = 0.4, method = "loess") +
@@ -80,13 +83,19 @@ plot_hv_comparison = function(data_set_names, methods = NULL, savepdf = TRUE) {
       legend.margin = margin()
     )
   
-  p = shift_legend_bottom_right(p)
+  if (length(data_set_names) > 1) {
+    p = shift_legend_bottom_right(p)
+  } else {
+    p = p + theme(legend.position = "bottom", legend.title=element_blank()) + 
+      guides(color=guide_legend(ncol=5))
+  }
   
   if (savepdf) {
     fig.path = "evaluation-hv/figures"
     dir.create(fig.path, showWarnings = FALSE)
     ggsave(filename = file.path(fig.path, "hv.pdf"), plot = p, width = 7, height = 5)
   }
+  return(p)
 }
 
 
