@@ -45,8 +45,17 @@ plot_hv_comparison = function(data_set_names, methods = NULL, savepdf = TRUE, re
     filter(data_name %in% data_set_names) %>% 
     mutate(algo_spec = gsub("TRUE", "1", algo_spec)) %>% 
     mutate(algo_spec = gsub("FALSE", "0", algo_spec)) %>% 
-    mutate(data_name = factor(data_name, levels = data_set_names)) %>% 
-    mutate(
+    mutate(data_name = factor(data_name, levels = data_set_names))
+  
+  if (!is.null(methods)) {
+    df_processed = df_processed %>% filter(algo_spec %in% methods)
+  }
+  if (returntable) {
+    return(df_processed)
+  }
+  
+  df_processed = df_processes %>% 
+      mutate(
       data_name = recode(
         data_name,
         bank8FM = "bank8FM (n = 8,192 | p = 8)",
@@ -57,13 +66,6 @@ plot_hv_comparison = function(data_set_names, methods = NULL, savepdf = TRUE, re
         tic_tac_toe = "tic_tac_toe (n = 958 | p = 9)",
       )
     )
-  
-  if (!is.null(methods)) {
-    df_processed = df_processed %>% filter(algo_spec %in% methods)
-  }
-  if (returntable) {
-    return(df_processed)
-  }
   
   p = ggplot(df_processed) +
     geom_smooth(aes(x = generation, y = mean_rank, color = algo_spec), se = FALSE, size = 0.4, method = "loess") +
