@@ -28,5 +28,14 @@ tab = plot_hv_comparison(
 
 tab = tab %>% ungroup()
 tab = tab[tab$generation %in% c(1, 50, 100, 150),]
-tab %>% group_by(method)
+tab %>% arrange(algo_spec, data_name, generation) %>% 
+  melt(id.vars = c("generation", "data_name"), variable.name = "algo_spec", value.name = "mean_rank")
 
+tab = tab %>% 
+   group_by(algo_spec) %>%
+  #  dplyr::mutate(i1 = row_number()) %>% 
+   spread(algo_spec, mean_rank) %>%
+  arrange(data_name, generation) 
+   # select(-i1)
+
+xtable::xtable(tab)
