@@ -14,13 +14,14 @@ plot_comparison = function(data_set_name, methods = c("whatif", "nice", "moc_ice
     res_long <- res_long %>% filter(algo_spec %in% methods)
   }
   n_colors = length(unique(res_long$algo_spec))
-  
+  # res_long$objlab <- factor(res_long$objective, labels = c("o[valid]", "o[proxi]", "o[sparse]", "o[plaus]", "n"))
   
   if (data_set_name == "diabetis") data_set_name = "diabetes"
   plt = ggplot(res_long) +
     geom_boxplot(aes(x = algo_spec, y = value, fill = algo_spec), show.legend = FALSE) +
     scale_x_discrete(limits = rev) +
     facet_grid(model_name ~ objective, scales = "free") +
+    # facet_grid(model_name ~ objlab, scales = "free", labeller = label_parsed) +
     scale_fill_manual(values = RColorBrewer::brewer.pal(n = n_colors, name = "Paired")) +
     theme_bw() +
     coord_flip() +
