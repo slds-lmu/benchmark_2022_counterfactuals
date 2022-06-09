@@ -46,7 +46,7 @@ in a sql_lite database (`db_evals.db`) for quick retrieval
 
 Quality comparison            |  Speed comparison
 :-------------------------:|:-------------------------:
-<img src="https://user-images.githubusercontent.com/33908442/133095507-6d6eb8e5-fa44-4841-8e1f-4c491295b990.png" width="60%" height="80%">  |  <img src=https://user-images.githubusercontent.com/33908442/133096774-9746b45f-f4b7-4f70-9e91-922c6671086f.png width="100%" height="100%"> 
+<img src="https://user-images.githubusercontent.com/25373845/172850210-5c4432e1-b928-4bf2-9cd6-ab6e7244dee4.png" width="100%" height="100%">  |  <img src="https://user-images.githubusercontent.com/25373845/172850933-089487c0-8915-499f-a556-6d935a4e96a3.png" width="100%" height="100%"> 
 
 ### 5) Evaluation hypervolume (evaluation-hv/)
 
@@ -58,11 +58,12 @@ in a sql_lite database (`db_evals_hv.db`) for quick retrieval
 
 #### 5.2) Analysis
 
-- Creates a facet grid with line graphs showing the hypervolume evolution over the generations for all MOC configurations overall and for each dataset separately
+- Creates a facet grid with line graphs showing the hypervolume evolution over the generations for all MOC configurations overall and for each dataset separately!
+
 - All data are queried from the database `db_setup_hv.db`
 - Main functions: `analysis_hv.R`
 
 <p align="center">
-  <img width="60%" height="60%" src="https://user-images.githubusercontent.com/33908442/133098397-7b530d4a-0b95-45c5-8793-1be11fe598b6.png">
+  <img width="60%" height="60%" src="https://user-images.githubusercontent.com/25373845/172851429-78ac1940-ea01-4a3f-b951-f890535886b9.png">
 </p>
 
