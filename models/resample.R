@@ -16,7 +16,7 @@ for (i in model_job_params$job.id) {
     if (!dir.exists(save_dir)) dir.create(save_dir)
     saveRDS(rr, file.path(save_dir, paste0(this_job$algorithm, "_rr.rds")))
   } else {
-    this_data <- data_list[[this_job$problem]]$data
+    this_data <- data_list[[this_job$problem]]
     this_task <- as_task_classif(this_data, names(this_data)[ncol(this_data)])
     this_at <- loadResult(i, model_registry)
     rr <- resample(this_task, this_at, rsmp("cv", folds = 5L), store_models = TRUE)
