@@ -1,4 +1,4 @@
-plot_comparison = function(data_set_name, methods = c("whatif", "nice", "moc_icecurve_0", "moc_icecurve_1"), savepdf = TRUE) {
+plot_comparison = function(data_set_name, methods = c("whatif", "nice", "moc_icecurve_0", "moc_icecurve_1"), savepdf = FALSE) {
 
   con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
   res = tbl(con, paste0(data_set_name, "_EVAL")) %>% collect()
@@ -87,8 +87,7 @@ speed_comparison = function(type = "n", methods = c("moc_icecurve_0", "moc_icecu
 }
 
 plot_speed_comparison = function(type = "n", methods = c("moc_icecurve_0", "moc_icecurve_1", "nice_sparsity", "nice_proximity", "nice_plausibility" , "whatif"), 
-                                 savepdf = TRUE) {
-  
+                                 savepdf = FALSE) {
   df_res = speed_comparison(type, methods)
   g = ggplot(df_res) +
     geom_boxplot(aes(x = data_name, y = time_running, fill = algo_spec), show.legend = FALSE) +
@@ -102,13 +101,14 @@ plot_speed_comparison = function(type = "n", methods = c("moc_icecurve_0", "moc_
       axis.text = element_text(size = 8), 
       strip.text = element_text(size = 8, margin = margin(t = 2.5, r = 2.5, b = 2.5, l = 2.5, unit = "pt")), 
       axis.title = element_text(size = 9),
-      plot.margin = margin(t = 1, r = 0, b = 0, l = 0, unit = "pt")
+      plot.margin = margin(t = 1, r = 0, b = 0, l = 0, unit = "pt"), 
+      axis.text.x = element_text(angle = 60, vjust = 1, hjust=1)
     ) +
     scale_y_continuous(labels = function(x) format(x, big.mark = ",", scientific = FALSE))
   if (savepdf) {
     fig.path = "evaluation/figures"
     dir.create(fig.path, showWarnings = FALSE)
-    ggsave(filename = file.path(fig.path, paste0(paste(type, "runtime", sep = "_"), ".pdf")), plot = g, width = 4, height = 4)
+    ggsave(filename = file.path(fig.path, paste0(paste(type, "runtime", sep = "_"), ".pdf")), plot = g, width = 4.5, height = 5)
   }
   g
   
