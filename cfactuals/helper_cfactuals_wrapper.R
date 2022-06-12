@@ -24,7 +24,8 @@ nice_wrapper = function(data, job, instance, ...) {
   pred_x_interest = pred$predict(x_interest)
   desired_class = names(pred_x_interest)[apply(pred_x_interest, 1L, which.min)]
   
-  nice_classif = NICEClassif$new(pred, optimization = arg_list$optimization, return_multiple = TRUE, finish_early = FALSE, distance_function = "gower_c")
+  nice_classif = NICEClassif$new(pred, optimization = arg_list$optimization,
+    return_multiple = TRUE, finish_early = FALSE, distance_function = "gower_c")
   cfactuals = nice_classif$find_counterfactuals(
     x_interest, desired_class, desired_prob = c(0.5 + sqrt(.Machine$double.eps), 1)
   )
