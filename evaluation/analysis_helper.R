@@ -1,13 +1,14 @@
-plot_comparison = function(data_set_name, methods = c("whatif", "nice", "moc_icecurve_0", "moc_icecurve_1"), savepdf = FALSE) {
+plot_comparison = function(data_set_name, methods = c("whatif", "nice", "moc_icecurve_0", "moc_icecurve_1"), savepdf = TRUE) {
 
   con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
   res = tbl(con, paste0(data_set_name, "_EVAL")) %>% collect()
   DBI::dbDisconnect(con)
-  
-  res_long = res %>% 
+
+  res_long = res %>%
+    select(-dist_target) %>%
     mutate(model_name = recode(model_name, logistic_regression = "logreg", neural_network = "neuralnet")) %>% 
-    pivot_longer(c(dist_x_interest:dist_target, n), names_to = "objective") %>% 
-    mutate(objective = factor(objective, levels = c("dist_target", "dist_x_interest", "no_changed", "dist_train", "n"))) %>% 
+    pivot_longer(c(dist_x_interest:dist_train, n), names_to = "objective") %>% 
+    mutate(objective = factor(objective, levels = c("dist_x_interest", "no_changed", "dist_train", "n"))) %>% 
     mutate(algo_spec = recode(algo_spec, nice_sparsity = "nice", nice_proximity = "nice", nice_plausibility = "nice"))
   
   if (!is.null(methods)) {
@@ -17,6 +18,7 @@ plot_comparison = function(data_set_name, methods = c("whatif", "nice", "moc_ice
   # res_long$objlab <- factor(res_long$objective, labels = c("o[valid]", "o[proxi]", "o[sparse]", "o[plaus]", "n"))
   
   if (data_set_name == "diabetis") data_set_name = "diabetes"
+  
   plt = ggplot(res_long) +
     geom_boxplot(aes(x = algo_spec, y = value, fill = algo_spec), show.legend = FALSE) +
     scale_x_discrete(limits = rev) +
@@ -223,3 +225,62 @@ shift_legend_bottom_right = function(p) {
   names = empty.facet.panels$name
   lemon::reposition_legend(p, 'center', panel = names)
 }
+
+get_coverage = function(data_set_name, method1 = "moc_icecurve_1", method2 = "nice", method3 = "whatif") {
+
+  con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
+  res = tbl(con, paste0(data_set_name, "_EVAL")) %>% collect()
+  DBI::dbDisconnect(con)
+  
+  obj.nams = c("dist_train", "no_changed", "dist_x_interest")
+  res = data.table(res)
+  res_long = res %>%
+    select(-dist_target, id_x_interest, model_name, algo_spec, dist_train, no_changed, dist_x_interest) %>%
+    mutate(model_name = recode(model_name, logistic_regression = "logreg", neural_network = "neuralnet")) %>% 
+    mutate(algo_spec = recode(algo_spec, nice_sparsity = "nice", nice_proximity = "nice", nice_plausibility = "nice")) %>% 
+    filter(algo_spec %in% c(method1, method2, method3)) 
+  
+  resm1 = data.table(res_long %>% filter(algo_spec == method1))
+  resm2 = data.table(res_long %>% filter(algo_spec == method2))
+  resm3 = data.table(res_long %>% filter(algo_spec == method3))
+  
+  mod_nams = unique(res_long$model_name)
+  emptyres = data.table(matrix(as.numeric(NA), nrow = 10, ncol = length(mod_nams)))
+  colnames(emptyres) = mod_nams
+  resl = list(emptyres, emptyres)
+  names(resl) = c(method2, method3)
+  for (mod in unique(res_long$model_name)) {
+    for (row.id in unique(res_long$id_x_interest)) {
+      cf.resm1 = resm1[id_x_interest == row.id & model_name == mod, obj.nams, with = FALSE]
+      cf.resm2 = resm2[id_x_interest == row.id & model_name == mod, obj.nams, with = FALSE]
+      cf.resm3 = resm3[id_x_interest == row.id & model_name == mod, obj.nams, with = FALSE]
+      if (nrow(cf.resm1) > 0) {
+        rcresm2 = relative_coverage(pf1 = cf.resm2, pf2 = cf.resm1)
+        resl[[method2]][row.id, mod] = as.numeric(sum(rcresm2)/length(rcresm2))
+        rcresm3 = dom.ind.resm3 = relative_coverage(pf1 = cf.resm3, pf2 = cf.resm1)
+        resl[[method3]][row.id, mod] = sum(rcresm3)/length(rcresm3)
+      }
+    }
+  }
+  resla = lapply(resl, colMeans, na.rm = TRUE)
+  resla = lapply(resla, mean, na.rm = TRUE)
+  return(unlist(resla))
+}
+
+relative_coverage = function(pf1, pf2) {
+  assertTRUE(all(class(pf1) == class(pf2)))
+  pf1 = as.matrix(t(pf1))
+  pf2 = as.matrix(t(pf2))
+  n1 = ncol(pf1)
+  ranking = ecr::doNondominatedSorting(cbind(pf1, pf2))$ranks
+  minrankpf2 = min(ranking[(n1+1):length(ranking)])
+  rank1 = ranking[1:n1]
+  return(vapply(rank1, FUN.VALUE = logical(1), function(x) x > minrankpf2))
+}
+
+# print(xtable::xtable(cov.df, label = "tab:cov", 
+#   caption = "MOC's coverage rate of methods to be compared per data set averaged over all models."),  floating = TRUE, 
+#   floating.environment = "table",
+#   caption.placement = "top", 
+#   size = getOption("xtable.size", "small"), booktabs = TRUE)
+# 
