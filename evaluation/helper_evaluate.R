@@ -58,6 +58,7 @@ add_evals_to_db = function(data_set_name) {
   
   moc = res %>% 
     filter(algorithm  == "moc") %>% 
+    filter(dist_target == 0) %>%
     group_by(job.id) %>% 
     group_modify(~ data.frame(cbind(.x, "dom_hv" = comp_hv_contr(.x)))) %>% 
     ungroup() %>% 
