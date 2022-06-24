@@ -52,6 +52,7 @@ rownames(covmoc[[1]]) = c("diabetis", "tic_tac_toe", "credit_g", "run_or_walk_in
 rownames(covmoc[[2]]) = c("diabetis", "tic_tac_toe", "credit_g", "run_or_walk_info", "bank8FM", "hill_valley")
 resmoc = do.call(cbind, covmoc)
 colnames(resmoc) = c("nice", "whatif")
+xtable::xtable(resmoc)
 
 params = list(method1 = "nice", method2 = "moc_icecurve_1", method3 = "whatif")
 tt1 = do.call(get_coverage, c(list(data_set_name = "diabetis"),params)) 
@@ -65,4 +66,5 @@ rownames(covnice[[1]]) = c("diabetis", "tic_tac_toe", "credit_g", "run_or_walk_i
 rownames(covnice[[2]]) = c("diabetis", "tic_tac_toe", "credit_g", "run_or_walk_info", "bank8FM")
 do.call(cbind, covnice)
 resnice = do.call(cbind, covnice)
-colnames(resnice) = c("nice", "whatif")
+colnames(resnice) = c("moc_icecurve_1", "whatif")
+xtable::xtable(resnice)
