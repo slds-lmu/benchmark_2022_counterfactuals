@@ -55,7 +55,7 @@ add_evals_to_db = function(data_set_name) {
     # get number of distinct counterfactuals
     group_by(id_x_interest, model_name) %>% 
     group_modify(~ data.frame(cbind(.x, "n" = count(.x))))
-  
+
   moc = res %>% 
     filter(algorithm  == "moc") %>% 
     filter(dist_target == 0) %>%

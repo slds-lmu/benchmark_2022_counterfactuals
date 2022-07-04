@@ -10,6 +10,14 @@ plot_comparison = function(data_set_name, methods = c("whatif", "nice", "moc_ice
     pivot_longer(c(dist_x_interest:dist_train, n), names_to = "objective") %>% 
     mutate(objective = factor(objective, levels = c("dist_x_interest", "no_changed", "dist_train", "n"))) %>% 
     mutate(algo_spec = recode(algo_spec, nice_sparsity = "nice", nice_proximity = "nice", nice_plausibility = "nice"))
+
+  res_n = res_long %>% filter(objective == "n") %>% 
+    group_by(id_x_interest, model_name, algo_spec) %>%
+    group_modify(~ data.frame(cbind(.x, "diversity" = StatMatch::gower.dist(.x)))) %>%
+    filter(row_number()==1)
+  
+  res_long = res_long %>% filter(objective != "n")
+  res_long = do.call(rbind, list(res_long, res_n))
   
   if (!is.null(methods)) {
     res_long <- res_long %>% filter(algo_spec %in% methods)
@@ -92,9 +100,9 @@ plot_speed_comparison = function(type = "n", methods = c("moc_icecurve_0", "moc_
                                  savepdf = FALSE) {
   df_res = speed_comparison(type, methods)
   g = ggplot(df_res) +
-    geom_boxplot(aes(x = data_name, y = time_running, fill = algo_spec), show.legend = FALSE) +
+    geom_boxplot(aes(x = data_name, y = log(time_running), fill = algo_spec), show.legend = FALSE) +
     facet_wrap(vars(algo_spec), ncol = 1) +
-    ylab("runtime in seconds") +
+    ylab("log runtime in seconds") +
     xlab("") +
     guides(color = guide_legend(title = "method")) +
     coord_flip() +
