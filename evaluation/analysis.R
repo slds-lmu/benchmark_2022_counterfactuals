@@ -10,6 +10,7 @@ p1 = check_cfexp_generated(models = "neural_network")
 # ggsave("evaluation/figures/nn_proportion.pdf", height = 4, width = 5, plot = p1)
 
 # plot objectives and n
+p = plot_comparison_ranks()
 # for a subset of methods
 p2 = plot_comparison("diabetis")
 # ggsave(filename = "evaluation/figures/diabetes_obj.pdf", plot = p2, width = 5.5, height = 3.8)

@@ -1,19 +1,18 @@
 plot_comparison = function(data_set_name, methods = c("whatif", "nice", "moc_icecurve_0", "moc_icecurve_1"), savepdf = TRUE) {
-
+  
   con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
   res = tbl(con, paste0(data_set_name, "_EVAL")) %>% collect()
   DBI::dbDisconnect(con)
-
+  
   res_long = res %>%
     select(-dist_target) %>%
     mutate(model_name = recode(model_name, logistic_regression = "logreg", neural_network = "neuralnet")) %>% 
     pivot_longer(c(dist_x_interest:dist_train, n), names_to = "objective") %>% 
     mutate(objective = factor(objective, levels = c("dist_x_interest", "no_changed", "dist_train", "n"))) %>% 
     mutate(algo_spec = recode(algo_spec, nice_sparsity = "nice", nice_proximity = "nice", nice_plausibility = "nice"))
-
+  
   res_n = res_long %>% filter(objective == "n") %>% 
     group_by(id_x_interest, model_name, algo_spec) %>%
-    group_modify(~ data.frame(cbind(.x, "diversity" = StatMatch::gower.dist(.x)))) %>%
     filter(row_number()==1)
   
   res_long = res_long %>% filter(objective != "n")
@@ -67,7 +66,7 @@ speed_comparison = function(type = "n", methods = c("moc_icecurve_0", "moc_icecu
       mutate(data_name = data_name)
   }
   DBI::dbDisconnect(con)
-
+  
   df_res = do.call(rbind, res) %>% 
     group_by(id_x_interest, model_name, data_name, algo_spec) %>% 
     summarise(time_running = mean(time_running, na.rm = TRUE))
@@ -83,7 +82,7 @@ speed_comparison = function(type = "n", methods = c("moc_icecurve_0", "moc_icecu
       filter(!algo_spec %in% c("nice_sparsity", "nice_proximity", "nice_plausibility")) %>% 
       rbind(df_res_nice) %>% 
       mutate(data_name = recode(data_name, run_or_walk_info = "n = 88,588", run_or_walk_info_sub_1 = "n = 886", 
-                                run_or_walk_info_sub_10 = "n = 8,859")) %>% 
+        run_or_walk_info_sub_10 = "n = 8,859")) %>% 
       mutate(data_name = factor(data_name, levels = c("n = 88,588", "n = 8,859", "n = 886")))
     
   } else {
@@ -97,7 +96,7 @@ speed_comparison = function(type = "n", methods = c("moc_icecurve_0", "moc_icecu
 }
 
 plot_speed_comparison = function(type = "n", methods = c("moc_icecurve_0", "moc_icecurve_1", "nice_sparsity", "nice_proximity", "nice_plausibility" , "whatif"), 
-                                 savepdf = FALSE) {
+  savepdf = FALSE) {
   df_res = speed_comparison(type, methods)
   g = ggplot(df_res) +
     geom_boxplot(aes(x = data_name, y = log(time_running), fill = algo_spec), show.legend = FALSE) +
@@ -130,19 +129,19 @@ check_cfexp_generated = function(data_set_name, models = NULL) {
   res = list()
   
   for (data_name in c("diabetis", "tic_tac_toe", "credit_g", "run_or_walk_info", "hill_valley", "bank8FM")) {
-      if (data_name == "overall") next
-      res_df = tbl(con, paste0(data_name, "_EVAL")) %>% collect() %>% 
-        select(id_x_interest, algo_spec, model_name) %>% 
-        mutate(algo_spec = recode(algo_spec, nice_sparsity = "nice", nice_proximity = "nice", nice_plausibility = "nice")) %>%
-        distinct() %>% 
-        group_by(algo_spec, model_name) %>% 
-        summarise(proportion = n_distinct(id_x_interest)/10) %>% 
-        mutate(data_name = data_name)
-      if (!is.null(models)) {
-        res[[data_name]] = res_df %>% filter(model_name %in% models)
-      } else {
-        res[[data_name]] = res_df
-      }
+    if (data_name == "overall") next
+    res_df = tbl(con, paste0(data_name, "_EVAL")) %>% collect() %>% 
+      select(id_x_interest, algo_spec, model_name) %>% 
+      mutate(algo_spec = recode(algo_spec, nice_sparsity = "nice", nice_proximity = "nice", nice_plausibility = "nice")) %>%
+      distinct() %>% 
+      group_by(algo_spec, model_name) %>% 
+      summarise(proportion = n_distinct(id_x_interest)/10) %>% 
+      mutate(data_name = data_name)
+    if (!is.null(models)) {
+      res[[data_name]] = res_df %>% filter(model_name %in% models)
+    } else {
+      res[[data_name]] = res_df
+    }
   }
   
   DBI::dbDisconnect(con)
@@ -177,51 +176,51 @@ check_cfexp_generated = function(data_set_name, models = NULL) {
     #   )
     p = ggplot(plt_data) +
       geom_tile(aes(x = model_name, y = algo_spec, fill = proportion), color = "white",
-                lwd = 1.5,
-                linetype = 1) +
+        lwd = 1.5,
+        linetype = 1) +
       theme_bw() +
       scale_fill_gradient(low = "white", high = "blue") +
       facet_wrap(vars(data_name), ncol = 3) +
       theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-            panel.background = element_blank(), axis.title.y = element_blank(), axis.title.x = element_blank())
+        panel.background = element_blank(), axis.title.y = element_blank(), axis.title.x = element_blank())
     
     p = shift_legend_bottom_right(p)
     
-} else {
-  
-  ro = do.call(rbind, res)
-  ro = ro %>% group_by(algo_spec, model_name) %>% summarise(proportion = mean(proportion)) %>% 
-    mutate(data_name = "overall")
-  res[["overall"]] = ro
-  
-  plt_data = do.call(rbind,res) %>% ungroup()
-  data_set_names = unique(plt_data$data_name)
-  plt_data = plt_data %>%
-  #   filter(data_name %in% data_set_names) %>%
-  mutate(data_name = factor(data_name, levels = data_set_names)) 
-  #   mutate(
-  #     data_name = recode(
-  #       data_name,
-  #       bank8FM = "bank8FM (n = 8,192 | p = 8)",
-  #       credit_g = "credit_g (n = 1,000 | p = 20)",
-  #       diabetes = "diabetes (n = 768 | p = 8)",
-  #       hill_valley = "hill_valley (n = 1,212 | p = 100)",
-  #       run_or_walk_information = "run_or_walk_information (n = 88,588 | p = 6)",
-  #       tic_tac_toe = "tic_tac_toe (n = 958 | p = 9)",
-  #     )
-  #   )
-  p = ggplot(plt_data) +
-    geom_tile(aes(x = data_name, y = algo_spec, fill = proportion), color = "white",
-              lwd = 1.5,
-              linetype = 1) +
-    theme_bw() +
-    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) + 
-    scale_fill_gradient(low = "white", high = "blue") +
-    # facet_wrap(vars(data_name), ncol = 3) +
-    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-          panel.background = element_blank(), axis.title.y = element_blank(), axis.title.x = element_blank())
+  } else {
+    
+    ro = do.call(rbind, res)
+    ro = ro %>% group_by(algo_spec, model_name) %>% summarise(proportion = mean(proportion)) %>% 
+      mutate(data_name = "overall")
+    res[["overall"]] = ro
+    
+    plt_data = do.call(rbind,res) %>% ungroup()
+    data_set_names = unique(plt_data$data_name)
+    plt_data = plt_data %>%
+      #   filter(data_name %in% data_set_names) %>%
+      mutate(data_name = factor(data_name, levels = data_set_names)) 
+    #   mutate(
+    #     data_name = recode(
+    #       data_name,
+    #       bank8FM = "bank8FM (n = 8,192 | p = 8)",
+    #       credit_g = "credit_g (n = 1,000 | p = 20)",
+    #       diabetes = "diabetes (n = 768 | p = 8)",
+    #       hill_valley = "hill_valley (n = 1,212 | p = 100)",
+    #       run_or_walk_information = "run_or_walk_information (n = 88,588 | p = 6)",
+    #       tic_tac_toe = "tic_tac_toe (n = 958 | p = 9)",
+    #     )
+    #   )
+    p = ggplot(plt_data) +
+      geom_tile(aes(x = data_name, y = algo_spec, fill = proportion), color = "white",
+        lwd = 1.5,
+        linetype = 1) +
+      theme_bw() +
+      theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) + 
+      scale_fill_gradient(low = "white", high = "blue") +
+      # facet_wrap(vars(data_name), ncol = 3) +
+      theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.title.y = element_blank(), axis.title.x = element_blank())
   } 
-return(p)
+  return(p)
 }
 
 shift_legend_bottom_right = function(p) {
@@ -235,7 +234,7 @@ shift_legend_bottom_right = function(p) {
 }
 
 get_coverage = function(data_set_name, method1 = "moc_icecurve_1", method2 = "nice", method3 = "whatif") {
-
+  
   con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
   res = tbl(con, paste0(data_set_name, "_EVAL")) %>% collect()
   DBI::dbDisconnect(con)
@@ -275,16 +274,16 @@ get_coverage = function(data_set_name, method1 = "moc_icecurve_1", method2 = "ni
   return(unlist(resla))
 }
 
-relative_coverage = function(pf1, pf2) {
-  assertTRUE(all(class(pf1) == class(pf2)))
-  pf1 = as.matrix(t(pf1))
-  pf2 = as.matrix(t(pf2))
-  n1 = ncol(pf1)
-  ranking = ecr::doNondominatedSorting(cbind(pf1, pf2))$ranks
-  minrankpf2 = min(ranking[(n1+1):length(ranking)])
-  rank1 = ranking[1:n1]
-  return(vapply(rank1, FUN.VALUE = logical(1), function(x) x > minrankpf2))
-}
+# relative_coverage = function(pf1, pf2) {
+#   assertTRUE(all(class(pf1) == class(pf2)))
+#   pf1 = as.matrix(t(pf1))
+#   pf2 = as.matrix(t(pf2))
+#   n1 = ncol(pf1)
+#   ranking = ecr::doNondominatedSorting(cbind(pf1, pf2))$ranks
+#   minrankpf2 = min(ranking[(n1+1):length(ranking)])
+#   rank1 = ranking[1:n1]
+#   return(vapply(rank1, FUN.VALUE = logical(1), function(x) x > minrankpf2))
+# }
 
 # print(xtable::xtable(cov.df, label = "tab:cov", 
 #   caption = "MOC's coverage rate of methods to be compared per data set averaged over all models."),  floating = TRUE, 
@@ -292,3 +291,91 @@ relative_coverage = function(pf1, pf2) {
 #   caption.placement = "top", 
 #   size = getOption("xtable.size", "small"), booktabs = TRUE)
 # 
+
+plot_comparison_ranks = function (methods = c("whatif", "nice", "moc_icecurve_0", "moc_icecurve_1")) {
+
+  data_set_names = c("diabetis", "tic_tac_toe", "credit_g", "run_or_walk_info", "hill_valley", "bank8FM")
+
+  # loop through dataset to compute ranks of objectives, average these over the datapoints
+  aggrres = lapply(data_set_names, function(datanam) {
+
+    con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
+    res = tbl(con, paste0(data_set_name, "_EVAL")) %>% collect()
+    DBI::dbDisconnect(con)
+    
+    temp = res %>%
+      select(-dist_target) %>%
+      mutate(model_name = recode(model_name, logistic_regression = "logreg", neural_network = "neuralnet")) %>% 
+      pivot_longer(c(dist_x_interest:dist_train, n), names_to = "objective") %>% 
+      mutate(objective = factor(objective, levels = c("dist_x_interest", "no_changed", "dist_train", "n"))) %>% 
+      mutate(algo_spec = recode(algo_spec, nice_sparsity = "nice", nice_proximity = "nice", nice_plausibility = "nice")) %>% 
+      select(id_x_interest, model_name, algo_spec, objective, value)  %>% 
+      filter(algo_spec %in% methods)
+    
+    res_n = temp %>% filter(objective == "n") %>% 
+      group_by(id_x_interest, model_name, algo_spec) %>%
+      filter(row_number()==1)
+      
+    
+    temp_rank = temp %>% 
+      filter(objective != "n") %>%
+      group_by(id_x_interest, model_name, objective)%>% 
+      group_modify(~ data.frame(cbind(.x, "n" = count(.x)))) %>%
+        mutate(value = rank(value)/n) %>% 
+        arrange(model_name, id_x_interest, objective) %>%
+        select(-n)
+    
+    fronts = compute_fronts(res)
+  
+    return(rbind(temp_rank, res_n, fronts))
+  })
+  
+  ll = do.call(rbind, aggrres)
+  ll$objective = factor(ll$objective, levels = c("dist_x_interest", "no_changed", "dist_train", "rank_nondom", "n"), 
+    labels = c("rank_dist_x_interest", "rank_no_changed", "rank_dist_train", "rank_nondom", "n"))
+  
+  n_colors = length(unique(ll$algo_spec))
+  
+  plt = ggplot(ll) +
+    geom_boxplot(aes(x = algo_spec, y = value, fill = algo_spec), show.legend = FALSE) +
+    scale_x_discrete(limits = rev) +
+    facet_grid(model_name ~ objective, scales = "free") +
+    # facet_grid(model_name ~ objlab, scales = "free", labeller = label_parsed) +
+    scale_fill_manual(values = RColorBrewer::brewer.pal(n = n_colors, name = "Paired")) +
+    theme_bw() +
+    coord_flip() +
+    ylab("") + xlab("") +
+    theme(
+      strip.text = element_text(size = 7, margin = margin(t = 2.5, r = 2.5, b = 2.5, l = 2.5, unit = "pt")), 
+      axis.text.x = element_text(angle = 45, hjust = 1),
+      axis.text = element_text(size = 7),
+      panel.spacing = unit(2, "pt")
+    )
+  
+  fig.path = "evaluation/figures"
+  dir.create(fig.path, showWarnings = FALSE)
+  ggsave(filename = file.path(fig.path, paste0(paste("overall", "obj_ranks", sep = "_"), ".pdf")), plot = plt, width = 7.5, height = 6) # 5.5, 3.8
+  
+}
+
+compute_fronts = function(res) {
+  temp = res %>%
+    select(-dist_target) %>%
+    mutate(model_name = recode(model_name, logistic_regression = "logreg", neural_network = "neuralnet")) %>% 
+    mutate(algo_spec = recode(algo_spec, nice_sparsity = "nice", nice_proximity = "nice", nice_plausibility = "nice")) %>% 
+    select(id_x_interest, model_name, algo_spec, dist_x_interest, no_changed, dist_train)  %>% 
+    filter(algo_spec %in% methods)
+  
+  grid_large = expand.grid(unique(temp$id_x_interest), unique(temp$model_name))
+  ls = apply(grid_large, MARGIN = 1L, function(row) {
+    df = temp[temp$id_x_interest == as.numeric(row[1]) & temp$model_name == row[2], ]
+    df$value = miesmuschel::rank_nondominated(-as.matrix(df[, c("dist_x_interest", "no_changed", "dist_train")]))$fronts
+    df$objective = "rank_nondom"
+    df = df %>%
+      select(-dist_x_interest, -no_changed, -dist_train)
+    return(df)
+  })
+  return(do.call(rbind, ls))
+}
+
+
