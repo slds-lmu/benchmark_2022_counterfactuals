@@ -7,7 +7,7 @@ whatif_wrapper = function(data, job, instance, ...) {
   pred_x_interest = pred$predict(x_interest)
   desired_class = names(pred_x_interest)[apply(pred_x_interest, 1L, which.min)]
   
-  whatif_classif = WhatIfClassif$new(pred, arg_list$n_counterfactuals, distance_function = "gower_c")
+  whatif_classif = WhatIfClassif$new(pred, n_counterfactuals = 10L, distance_function = "gower_c")
   cfactuals = whatif_classif$find_counterfactuals(
     x_interest, desired_class, desired_prob = c(0.5 + sqrt(.Machine$double.eps), 1)
   )
@@ -43,7 +43,7 @@ moc_wrapper = function(data, job, instance, ...) {
   desired_class = names(pred_x_interest)[apply(pred_x_interest, 1L, which.min)]
   
   moc_classif = MOCClassif$new(
-    pred, init_strategy = arg_list$init_strategy, use_conditional_mutator = arg_list$use_conditional_mutator,
+    pred, init_strategy = "icecurve", use_conditional_mutator = FALSE,
     epsilon = 0L, quiet = TRUE, distance_function = "gower_c"
   )
   

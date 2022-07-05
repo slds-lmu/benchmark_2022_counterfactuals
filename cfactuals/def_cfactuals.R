@@ -9,7 +9,6 @@ models = c("ranger", "xgboost", "svm", "logistic_regression", "neural_network")
            
 ades = list(
   whatif = CJ(
-    n_counterfactuals = 10L,
     id_x_interest = 1:10,
     model_name = models
   ),
@@ -19,8 +18,6 @@ ades = list(
     model_name = models
   ),
   moc = CJ(
-    init_strategy = c("random", "icecurve", "sd", "traindata"),
-    use_conditional_mutator = c(TRUE, FALSE),
     id_x_interest = 1:10,
     model_name = models
   ),
