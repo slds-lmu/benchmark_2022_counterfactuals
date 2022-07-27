@@ -1,4 +1,4 @@
-plot_comparison = function(data_set_name, methods = c("whatif", "nice", "moc_icecurve_0", "moc_icecurve_1"), savepdf = TRUE) {
+plot_comparison = function(data_set_name, methods = c("whatif", "nice", "moc"), savepdf = TRUE) {
   
   con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
   res = tbl(con, paste0(data_set_name, "_EVAL")) %>% collect()
@@ -21,16 +21,16 @@ plot_comparison = function(data_set_name, methods = c("whatif", "nice", "moc_ice
   if (!is.null(methods)) {
     res_long <- res_long %>% filter(algo_spec %in% methods)
   }
-  n_colors = length(unique(res_long$algo_spec))
-  # res_long$objlab <- factor(res_long$objective, labels = c("o[valid]", "o[proxi]", "o[sparse]", "o[plaus]", "n"))
+ 
+   if (data_set_name == "diabetis") data_set_name = "diabetes"
   
-  if (data_set_name == "diabetis") data_set_name = "diabetes"
+   n_colors = length(unique(res_long$algo_spec))
+  # res_long$objlab <- factor(res_long$objective, labels = c("o[valid]", "o[proxi]", "o[sparse]", "o[plaus]", "n"))
   
   plt = ggplot(res_long) +
     geom_boxplot(aes(x = algo_spec, y = value, fill = algo_spec), show.legend = FALSE) +
     scale_x_discrete(limits = rev) +
     facet_grid(model_name ~ objective, scales = "free") +
-    # facet_grid(model_name ~ objlab, scales = "free", labeller = label_parsed) +
     scale_fill_manual(values = RColorBrewer::brewer.pal(n = n_colors, name = "Paired")) +
     theme_bw() +
     coord_flip() +
@@ -44,13 +44,13 @@ plot_comparison = function(data_set_name, methods = c("whatif", "nice", "moc_ice
   if (savepdf) {
     fig.path = "evaluation/figures"
     dir.create(fig.path, showWarnings = FALSE)
-    ggsave(filename = file.path(fig.path, paste0(paste(data_set_name, "obj_all", sep = "_"), ".pdf")), plot = plt, width = 9, height = 6.5) # 5.5, 3.8
+    ggsave(filename = file.path(fig.path, paste0(paste(data_set_name, "obj_all", sep = "_"), ".pdf")), plot = plt, width = 5.5, height = 3.8) # 5.5, 3.8
   }
   return(plt)
 }
 
 
-speed_comparison = function(type = "n", methods = c("moc_icecurve_0", "moc_icecurve_1", "nice_sparsity", "nice_proximity", "nice_plausibility" , "whatif")) {
+speed_comparison = function(type = "n", methods = c("moc", "nice_sparsity", "nice_proximity", "nice_plausibility" , "whatif")) {
   if (type == "n") {
     data_names = c("run_or_walk_info", "run_or_walk_info_sub_1", "run_or_walk_info_sub_10")
   } else {
@@ -95,7 +95,7 @@ speed_comparison = function(type = "n", methods = c("moc_icecurve_0", "moc_icecu
   df_res
 }
 
-plot_speed_comparison = function(type = "n", methods = c("moc_icecurve_0", "moc_icecurve_1", "nice_sparsity", "nice_proximity", "nice_plausibility" , "whatif"), 
+plot_speed_comparison = function(type = "n", methods = c("moc", "nice" , "whatif"), 
   savepdf = FALSE) {
   df_res = speed_comparison(type, methods)
   g = ggplot(df_res) +
@@ -117,7 +117,7 @@ plot_speed_comparison = function(type = "n", methods = c("moc_icecurve_0", "moc_
   if (savepdf) {
     fig.path = "evaluation/figures"
     dir.create(fig.path, showWarnings = FALSE)
-    ggsave(filename = file.path(fig.path, paste0(paste(type, "runtime", sep = "_"), ".pdf")), plot = g, width = 4.5, height = 5)
+    ggsave(filename = file.path(fig.path, paste0(paste(type, "runtime", sep = "_"), ".pdf")), plot = g, width = 3.5, height = 4)
   }
   g
   
@@ -233,7 +233,7 @@ shift_legend_bottom_right = function(p) {
   lemon::reposition_legend(p, 'center', panel = names)
 }
 
-get_coverage = function(data_set_name, method1 = "moc_icecurve_1", method2 = "nice", method3 = "whatif") {
+get_coverage = function(data_set_name, method1 = "moc", method2 = "nice", method3 = "whatif") {
   
   con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
   res = tbl(con, paste0(data_set_name, "_EVAL")) %>% collect()
@@ -274,16 +274,16 @@ get_coverage = function(data_set_name, method1 = "moc_icecurve_1", method2 = "ni
   return(unlist(resla))
 }
 
-# relative_coverage = function(pf1, pf2) {
-#   assertTRUE(all(class(pf1) == class(pf2)))
-#   pf1 = as.matrix(t(pf1))
-#   pf2 = as.matrix(t(pf2))
-#   n1 = ncol(pf1)
-#   ranking = ecr::doNondominatedSorting(cbind(pf1, pf2))$ranks
-#   minrankpf2 = min(ranking[(n1+1):length(ranking)])
-#   rank1 = ranking[1:n1]
-#   return(vapply(rank1, FUN.VALUE = logical(1), function(x) x > minrankpf2))
-# }
+relative_coverage = function(pf1, pf2) {
+  assertTRUE(all(class(pf1) == class(pf2)))
+  pf1 = as.matrix(t(pf1))
+  pf2 = as.matrix(t(pf2))
+  n1 = ncol(pf1)
+  ranking = ecr::doNondominatedSorting(cbind(pf1, pf2))$ranks
+  minrankpf2 = min(ranking[(n1+1):length(ranking)])
+  rank1 = ranking[1:n1]
+  return(vapply(rank1, FUN.VALUE = logical(1), function(x) x > minrankpf2))
+}
 
 # print(xtable::xtable(cov.df, label = "tab:cov", 
 #   caption = "MOC's coverage rate of methods to be compared per data set averaged over all models."),  floating = TRUE, 
@@ -292,15 +292,13 @@ get_coverage = function(data_set_name, method1 = "moc_icecurve_1", method2 = "ni
 #   size = getOption("xtable.size", "small"), booktabs = TRUE)
 # 
 
-plot_comparison_ranks = function (methods = c("whatif", "nice", "moc_icecurve_0", "moc_icecurve_1")) {
-
-  data_set_names = c("diabetis", "tic_tac_toe", "credit_g", "run_or_walk_info", "hill_valley", "bank8FM")
+plot_comparison_ranks = function (methods = c("whatif", "nice", "moc"), orientation = "model", test = FALSE) {
+  data_set_names = c("credit_g", "diabetis", "tic_tac_toe", "bank8FM",  "hill_valley", "run_or_walk_info")
 
   # loop through dataset to compute ranks of objectives, average these over the datapoints
   aggrres = lapply(data_set_names, function(datanam) {
-
     con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
-    res = tbl(con, paste0(data_set_name, "_EVAL")) %>% collect()
+    res = tbl(con, paste0(datanam, "_EVAL")) %>% collect()
     DBI::dbDisconnect(con)
     
     temp = res %>%
@@ -308,43 +306,74 @@ plot_comparison_ranks = function (methods = c("whatif", "nice", "moc_icecurve_0"
       mutate(model_name = recode(model_name, logistic_regression = "logreg", neural_network = "neuralnet")) %>% 
       pivot_longer(c(dist_x_interest:dist_train, n), names_to = "objective") %>% 
       mutate(objective = factor(objective, levels = c("dist_x_interest", "no_changed", "dist_train", "n"))) %>% 
-      mutate(algo_spec = recode(algo_spec, nice_sparsity = "nice", nice_proximity = "nice", nice_plausibility = "nice")) %>% 
+      # mutate(algo_spec = recode(algo_spec, nice_sparsity = "nice", nice_proximity = "nice", nice_plausibility = "nice")) %>% 
       select(id_x_interest, model_name, algo_spec, objective, value)  %>% 
       filter(algo_spec %in% methods)
     
+    # save info on number cfexp in extra dataset
     res_n = temp %>% filter(objective == "n") %>% 
       group_by(id_x_interest, model_name, algo_spec) %>%
       filter(row_number()==1)
-      
     
-    temp_rank = temp %>% 
+    # calculate ranks per objective
+    temp_rank = temp %>%
       filter(objective != "n") %>%
-      group_by(id_x_interest, model_name, objective)%>% 
+      group_by(id_x_interest, model_name, objective)%>%
       group_modify(~ data.frame(cbind(.x, "n" = count(.x)))) %>%
-        mutate(value = rank(value)/n) %>% 
+        mutate(value = rank(value)/n) %>%
         arrange(model_name, id_x_interest, objective) %>%
         select(-n)
     
-    fronts = compute_fronts(res)
+    # compute ranks for fronts
+    fronts = compute_fronts(res, methods)
   
     return(rbind(temp_rank, res_n, fronts))
   })
-  
-  ll = do.call(rbind, aggrres)
+  names(aggrres) = data_set_names  
+  ll = dplyr::bind_rows(aggrres, .id = "dataset")
   ll$objective = factor(ll$objective, levels = c("dist_x_interest", "no_changed", "dist_train", "rank_nondom", "n"), 
     labels = c("rank_dist_x_interest", "rank_no_changed", "rank_dist_train", "rank_nondom", "n"))
+  
+  if (test) {
+    browser()
+    subset = c("nice", "moc")
+    testdata = ll %>% filter(algo_spec %in% subset)
+    testdata$algo_spec = factor(testdata$algo_spec, labels = subset, levels = subset)
+    if (orientation == "model") {
+      stratif = unique(testdata$model_name)
+      names(testdata)[which(names(testdata) == "model_name")] = "stratif"
+       lookup = expand.grid(stratif, unique(testdata$objective)[-4])
+       names(lookup) = c("model_name", "objective")
+    } else if (orientation == "dataset") {
+      stratif = unique(testdata$dataset)
+      names(testdata)[which(names(testdata) == "dataset")] = "stratif"
+      lookup = expand.grid(stratif, unique(testdata$objective)[-4])
+      names(lookup) = c("dataset", "objective")
+    }
+    t = apply(lookup, MARGIN = 1L, FUN = function(row) {
+      wilcox.test(value ~ algo_spec, data = testdata %>% filter(stratif == row[[1]], objective == row[[2]]),
+                  alternative = "greater",
+                  exact = FALSE, correct = FALSE, conf.int = FALSE)$p.value
+    })
+    lookup$p_value = ifelse(t > 0.01, "", ifelse(t > 0.05, ".", ifelse(t > 0.01, "*", ifelse(t > 0.001, "**", "***"))))
+  }
+  ll$dataset = factor(ll$dataset, levels = data_set_names, labels = data_set_names)
   
   n_colors = length(unique(ll$algo_spec))
   
   plt = ggplot(ll) +
     geom_boxplot(aes(x = algo_spec, y = value, fill = algo_spec), show.legend = FALSE) +
-    scale_x_discrete(limits = rev) +
-    facet_grid(model_name ~ objective, scales = "free") +
-    # facet_grid(model_name ~ objlab, scales = "free", labeller = label_parsed) +
-    scale_fill_manual(values = RColorBrewer::brewer.pal(n = n_colors, name = "Paired")) +
+    scale_x_discrete(limits = rev) 
+  if (orientation == "model") {
+  plt = plt +  facet_grid(model_name ~ objective, scales = "free") 
+  } else if (orientation == "dataset") {
+    plt = plt + facet_grid(dataset ~ objective, scales = "free")
+  }
+  plt = plt + scale_fill_manual(values = RColorBrewer::brewer.pal(n = n_colors, name = "Paired")) +
     theme_bw() +
     coord_flip() +
-    ylab("") + xlab("") +
+    ylab("") + 
+    xlab("") +
     theme(
       strip.text = element_text(size = 7, margin = margin(t = 2.5, r = 2.5, b = 2.5, l = 2.5, unit = "pt")), 
       axis.text.x = element_text(angle = 45, hjust = 1),
@@ -352,17 +381,26 @@ plot_comparison_ranks = function (methods = c("whatif", "nice", "moc_icecurve_0"
       panel.spacing = unit(2, "pt")
     )
   
+  if (test) {
+    plt = plt + geom_text(
+    data    = lookup,
+    mapping = aes(x = 2, y = - Inf, label = p_value),
+    hjust   = -0.1,
+    vjust   = -1
+)
+  }
+  
   fig.path = "evaluation/figures"
   dir.create(fig.path, showWarnings = FALSE)
-  ggsave(filename = file.path(fig.path, paste0(paste("overall", "obj_ranks", sep = "_"), ".pdf")), plot = plt, width = 7.5, height = 6) # 5.5, 3.8
+  ggsave(filename = file.path(fig.path, paste0(paste("overall", orientation, "obj_ranks", sep = "_"), ".pdf")), plot = plt, width = 7.5, height = 6) # 5.5, 3.8
   
+  return(plt)
 }
 
-compute_fronts = function(res) {
+compute_fronts = function(res, methods) {
   temp = res %>%
     select(-dist_target) %>%
     mutate(model_name = recode(model_name, logistic_regression = "logreg", neural_network = "neuralnet")) %>% 
-    mutate(algo_spec = recode(algo_spec, nice_sparsity = "nice", nice_proximity = "nice", nice_plausibility = "nice")) %>% 
     select(id_x_interest, model_name, algo_spec, dist_x_interest, no_changed, dist_train)  %>% 
     filter(algo_spec %in% methods)
   
@@ -370,6 +408,7 @@ compute_fronts = function(res) {
   ls = apply(grid_large, MARGIN = 1L, function(row) {
     df = temp[temp$id_x_interest == as.numeric(row[1]) & temp$model_name == row[2], ]
     df$value = miesmuschel::rank_nondominated(-as.matrix(df[, c("dist_x_interest", "no_changed", "dist_train")]))$fronts
+    df$value = df$value/max(df$value)
     df$objective = "rank_nondom"
     df = df %>%
       select(-dist_x_interest, -no_changed, -dist_train)
