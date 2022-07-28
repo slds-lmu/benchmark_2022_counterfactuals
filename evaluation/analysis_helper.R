@@ -335,7 +335,6 @@ plot_comparison_ranks = function (methods = c("whatif", "nice", "moc"), orientat
     labels = c("rank_dist_x_interest", "rank_no_changed", "rank_dist_train", "rank_nondom", "n"))
   
   if (test) {
-    browser()
     subset = c("nice", "moc")
     testdata = ll %>% filter(algo_spec %in% subset)
     testdata$algo_spec = factor(testdata$algo_spec, labels = subset, levels = subset)
@@ -352,10 +351,14 @@ plot_comparison_ranks = function (methods = c("whatif", "nice", "moc"), orientat
     }
     t = apply(lookup, MARGIN = 1L, FUN = function(row) {
       wilcox.test(value ~ algo_spec, data = testdata %>% filter(stratif == row[[1]], objective == row[[2]]),
-                  alternative = "greater",
                   exact = FALSE, correct = FALSE, conf.int = FALSE)$p.value
     })
-    lookup$p_value = ifelse(t > 0.01, "", ifelse(t > 0.05, ".", ifelse(t > 0.01, "*", ifelse(t > 0.001, "**", "***"))))
+    lookup$p.signif = ifelse(t > 0.1, "ns", ifelse(t > 0.05, ".", ifelse(t > 0.01, "*", ifelse(t > 0.001, "**", "***"))))
+    lookup$p = ""
+    lookup$group1 = "moc"
+    lookup$group2 = "nice"
+    lookup$.y. = "value"
+    lookup = tibble::as_tibble(lookup)
   }
   ll$dataset = factor(ll$dataset, levels = data_set_names, labels = data_set_names)
   
@@ -366,8 +369,10 @@ plot_comparison_ranks = function (methods = c("whatif", "nice", "moc"), orientat
     scale_x_discrete(limits = rev) 
   if (orientation == "model") {
   plt = plt +  facet_grid(model_name ~ objective, scales = "free") 
+  height = 6.5
   } else if (orientation == "dataset") {
     plt = plt + facet_grid(dataset ~ objective, scales = "free")
+    height = 7.5
   }
   plt = plt + scale_fill_manual(values = RColorBrewer::brewer.pal(n = n_colors, name = "Paired")) +
     theme_bw() +
@@ -382,17 +387,22 @@ plot_comparison_ranks = function (methods = c("whatif", "nice", "moc"), orientat
     )
   
   if (test) {
-    plt = plt + geom_text(
+    plt = plt + 
+       stat_pvalue_manual(lookup, label = "p", vjust = 2.2, y.position = 0.9, coord.flip = FALSE,   
+         tip.length = 0, color = "gray") + 
+    geom_text(
     data    = lookup,
-    mapping = aes(x = 2, y = - Inf, label = p_value),
+    mapping = aes(x = 2.2, y = .92, label = p.signif),
     hjust   = -0.1,
-    vjust   = -1
+    vjust   = -1, 
+    size = 2.5
 )
   }
   
   fig.path = "evaluation/figures"
   dir.create(fig.path, showWarnings = FALSE)
-  ggsave(filename = file.path(fig.path, paste0(paste("overall", orientation, "obj_ranks", sep = "_"), ".pdf")), plot = plt, width = 7.5, height = 6) # 5.5, 3.8
+  ggsave(filename = file.path(fig.path, paste0(paste("overall", orientation, 
+    "obj_ranks", sep = "_"), ".pdf")), plot = plt, width = 7.5, height = height) # 5.5, 3.8
   
   return(plt)
 }
