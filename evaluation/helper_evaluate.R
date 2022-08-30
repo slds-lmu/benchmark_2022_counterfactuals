@@ -59,13 +59,22 @@ add_evals_to_db = function(data_set_name) {
       # slice_head(n = 4) %>% 
       # ungroup() %>% 
       # overall only keep 10 per instance & model
-      group_by(id_x_interest, model_name) %>%
-      arrange(no_changed) %>% 
-      slice_head(n = 10) %>%
+      # Version 1: Group by hypervolume contribution
+      group_by(job.id) %>%
+      group_modify(~ data.frame(cbind(.x, "dom_hv" = comp_hv_contr(.x)))) %>% 
+      ungroup() %>% 
       mutate(algo_spec = "nice") %>% 
+      group_by(id_x_interest, model_name) %>%
+      arrange(dist_target, desc(dom_hv)) %>% 
+      
+      # Version 2: select by no_changed
+      #group_by(id_x_interest, model_name) %>%
+      #arrange(no_changed) %>% 
+      slice_head(n = 10) %>%
+      # mutate(algo_spec = "nice") %>% 
       # ungroup() %>% 
       # get number of distinct counterfactuals
-      group_by(id_x_interest, model_name) %>% 
+      # group_by(id_x_interest, model_name) %>% 
       group_modify(~ data.frame(cbind(.x, "n" = count(.x))))
 
   moc = res %>% 
