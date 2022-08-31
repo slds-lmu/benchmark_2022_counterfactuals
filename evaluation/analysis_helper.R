@@ -377,7 +377,7 @@ plot_comparison_ranks = function (methods = c("whatif", "nice", "moc"), orientat
   height = 5.5
   } else if (orientation == "dataset") {
     plt = plt + facet_grid(dataset ~ objective, scales = "free")
-    height = 6
+    height = 6.5
   }
   plt = plt + scale_fill_manual(values = RColorBrewer::brewer.pal(n = n_colors, name = "Paired")) +
     theme_bw() +
