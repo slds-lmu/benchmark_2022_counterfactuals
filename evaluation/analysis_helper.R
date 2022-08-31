@@ -98,12 +98,14 @@ speed_comparison = function(type = "n", methods = c("moc", "nice_sparsity", "nic
 plot_speed_comparison = function(type = "n", methods = c("moc", "nice" , "whatif"), 
   savepdf = FALSE) {
   df_res = speed_comparison(type, methods)
+  n_colors = length(methods)
+  # df_res %>% group_by(data_name, algo_spec) %>% summarise_at(vars(-id_x_interest, -model_name),  funs(mean(., na.rm=TRUE)))
   g = ggplot(df_res) +
-    geom_boxplot(aes(x = data_name, y = log(time_running), fill = algo_spec), show.legend = FALSE) +
+    geom_boxplot(aes(x = data_name, y = time_running, fill = algo_spec), show.legend = FALSE) +
     facet_wrap(vars(algo_spec), ncol = 1) +
-    ylab("log runtime in seconds") +
+    ylab("runtime in seconds") +
     xlab("") +
-    guides(color = guide_legend(title = "method")) +
+    scale_fill_manual(values = RColorBrewer::brewer.pal(n = n_colors, name = "Paired")) +
     coord_flip() +
     theme_bw() +
     theme(
@@ -194,7 +196,7 @@ check_cfexp_generated = function(data_set_name, models = NULL) {
     res[["overall"]] = ro
     
     plt_data = do.call(rbind,res) %>% ungroup()
-    data_set_names = unique(plt_data$data_name)
+    data_set_names = names(res)
     plt_data = plt_data %>%
       #   filter(data_name %in% data_set_names) %>%
       mutate(data_name = factor(data_name, levels = data_set_names)) 
@@ -292,7 +294,7 @@ relative_coverage = function(pf1, pf2) {
 #   size = getOption("xtable.size", "small"), booktabs = TRUE)
 # 
 
-plot_comparison_ranks = function (methods = c("whatif", "nice", "moc"), orientation = "model", test = FALSE) {
+plot_comparison_ranks = function (methods = c("whatif", "nice", "moc"), orientation = "model", test = FALSE, savepdf = TRUE) {
   data_set_names = c("credit_g", "diabetis", "tic_tac_toe", "bank8FM",  "hill_valley", "run_or_walk_info")
 
   # loop through dataset to compute ranks of objectives, average these over the datapoints
@@ -335,30 +337,34 @@ plot_comparison_ranks = function (methods = c("whatif", "nice", "moc"), orientat
     labels = c("rank_dist_x_interest", "rank_no_changed", "rank_dist_train", "rank_nondom", "n"))
   
   if (test) {
-    subset = c("nice", "moc")
-    testdata = ll %>% filter(algo_spec %in% subset)
-    testdata$algo_spec = factor(testdata$algo_spec, labels = subset, levels = subset)
-    if (orientation == "model") {
-      stratif = unique(testdata$model_name)
-      names(testdata)[which(names(testdata) == "model_name")] = "stratif"
+   create_test_df = function(data, subset = c("nice", "moc")) {
+     testdata = data %>% filter(algo_spec %in% subset)
+     testdata$algo_spec = factor(testdata$algo_spec, labels = subset, levels = subset)
+     if (orientation == "model") {
+       stratif = unique(testdata$model_name)
+       names(testdata)[which(names(testdata) == "model_name")] = "stratif"
        lookup = expand.grid(stratif, unique(testdata$objective)[-4])
        names(lookup) = c("model_name", "objective")
-    } else if (orientation == "dataset") {
-      stratif = unique(testdata$dataset)
-      names(testdata)[which(names(testdata) == "dataset")] = "stratif"
-      lookup = expand.grid(stratif, unique(testdata$objective)[-4])
-      names(lookup) = c("dataset", "objective")
-    }
-    t = apply(lookup, MARGIN = 1L, FUN = function(row) {
-      wilcox.test(value ~ algo_spec, data = testdata %>% filter(stratif == row[[1]], objective == row[[2]]),
-                  exact = FALSE, correct = FALSE, conf.int = FALSE)$p.value
-    })
-    lookup$p.signif = ifelse(t > 0.1, "ns", ifelse(t > 0.05, ".", ifelse(t > 0.01, "*", ifelse(t > 0.001, "**", "***"))))
-    lookup$p = ""
-    lookup$group1 = "moc"
-    lookup$group2 = "nice"
-    lookup$.y. = "value"
-    lookup = tibble::as_tibble(lookup)
+     } else if (orientation == "dataset") {
+       stratif = unique(testdata$dataset)
+       names(testdata)[which(names(testdata) == "dataset")] = "stratif"
+       lookup = expand.grid(stratif, unique(testdata$objective)[-4])
+       names(lookup) = c("dataset", "objective")
+     }
+     t = apply(lookup, MARGIN = 1L, FUN = function(row) {
+       wilcox.test(value ~ algo_spec, data = testdata %>% filter(stratif == row[[1]], objective == row[[2]]),
+         exact = FALSE, correct = FALSE, conf.int = FALSE)$p.value
+     })
+     lookup$p.signif = ifelse(t > 0.1, "ns", ifelse(t > 0.05, ".", ifelse(t > 0.01, "*", ifelse(t > 0.001, "**", "***"))))
+     lookup$p = ""
+     lookup$group1 = subset[1]
+     lookup$group2 = subset[2]
+     lookup$.y. = "value"
+     lookup = tibble::as_tibble(lookup)
+   }
+   browser()
+   lookup1 = create_test_df(ll)
+   lookup2 = create_test_df(ll, subset = c("nice", "whatif"))
   }
   ll$dataset = factor(ll$dataset, levels = data_set_names, labels = data_set_names)
   
@@ -388,22 +394,34 @@ plot_comparison_ranks = function (methods = c("whatif", "nice", "moc"), orientat
   
   if (test) {
     plt = plt + 
-       stat_pvalue_manual(lookup, label = "p", vjust = 2.2, y.position = 0.9, coord.flip = FALSE,   
+       stat_pvalue_manual(lookup1, label = "p", vjust = 2.2, y.position = 0.9, coord.flip = FALSE,   
          tip.length = 0, color = "gray") + 
     geom_text(
-    data    = lookup,
+    data    = lookup1,
     mapping = aes(x = 2.2, y = .92, label = p.signif),
     hjust   = -0.1,
     vjust   = -1, 
     size = 2.5
 )
+    plt = plt + 
+      stat_pvalue_manual(lookup2, label = "p", vjust = 2.2, y.position = 0.9, coord.flip = FALSE,   
+        tip.length = 0, color = "gray") + 
+      geom_text(
+        data    = lookup2,
+        mapping = aes(x = 1.2, y = .92, label = p.signif),
+        hjust   = -0.1,
+        vjust   = -1, 
+        size = 2.5
+      )
+    
   }
-  
-  fig.path = "evaluation/figures"
-  dir.create(fig.path, showWarnings = FALSE)
-  ggsave(filename = file.path(fig.path, paste0(paste("overall", orientation, 
-    "obj_ranks", sep = "_"), ".pdf")), plot = plt, width = 7.5, height = height) # 5.5, 3.8
-  
+  if (savepdf) {
+    fig.path = "evaluation/figures"
+    dir.create(fig.path, showWarnings = FALSE)
+    ggsave(filename = file.path(fig.path, paste0(paste("overall", orientation, 
+      "obj_ranks", sep = "_"), ".pdf")), plot = plt, width = 7.5, height = height) # 5.5, 3.8
+  }
+
   return(plt)
 }
 
