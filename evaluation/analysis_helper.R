@@ -362,7 +362,6 @@ plot_comparison_ranks = function (methods = c("whatif", "nice", "moc"), orientat
      lookup$.y. = "value"
      lookup = tibble::as_tibble(lookup)
    }
-   browser()
    lookup1 = create_test_df(ll)
    lookup2 = create_test_df(ll, subset = c("nice", "whatif"))
   }
@@ -375,10 +374,10 @@ plot_comparison_ranks = function (methods = c("whatif", "nice", "moc"), orientat
     scale_x_discrete(limits = rev) 
   if (orientation == "model") {
   plt = plt +  facet_grid(model_name ~ objective, scales = "free") 
-  height = 6.5
+  height = 5.5
   } else if (orientation == "dataset") {
     plt = plt + facet_grid(dataset ~ objective, scales = "free")
-    height = 7.5
+    height = 6
   }
   plt = plt + scale_fill_manual(values = RColorBrewer::brewer.pal(n = n_colors, name = "Paired")) +
     theme_bw() +
@@ -398,7 +397,7 @@ plot_comparison_ranks = function (methods = c("whatif", "nice", "moc"), orientat
          tip.length = 0, color = "gray") + 
     geom_text(
     data    = lookup1,
-    mapping = aes(x = 2.2, y = .92, label = p.signif),
+    mapping = aes(x = 2.1, y = .92, label = p.signif),
     hjust   = -0.1,
     vjust   = -1, 
     size = 2.5
@@ -408,7 +407,7 @@ plot_comparison_ranks = function (methods = c("whatif", "nice", "moc"), orientat
         tip.length = 0, color = "gray") + 
       geom_text(
         data    = lookup2,
-        mapping = aes(x = 1.2, y = .92, label = p.signif),
+        mapping = aes(x = 1.1, y = .92, label = p.signif),
         hjust   = -0.1,
         vjust   = -1, 
         size = 2.5
@@ -419,7 +418,7 @@ plot_comparison_ranks = function (methods = c("whatif", "nice", "moc"), orientat
     fig.path = "evaluation/figures"
     dir.create(fig.path, showWarnings = FALSE)
     ggsave(filename = file.path(fig.path, paste0(paste("overall", orientation, 
-      "obj_ranks", sep = "_"), ".pdf")), plot = plt, width = 7.5, height = height) # 5.5, 3.8
+      "obj_ranks", sep = "_"), ".pdf")), plot = plt, width = 6.5, height = height) # 5.5, 3.8
   }
 
   return(plt)
