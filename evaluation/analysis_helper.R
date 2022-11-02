@@ -101,8 +101,8 @@ plot_speed_comparison = function(type = "n", methods = c("moc", "nice" , "whatif
   n_colors = length(methods)
   # df_res %>% group_by(data_name, algo_spec) %>% summarise_at(vars(-id_x_interest, -model_name),  funs(mean(., na.rm=TRUE)))
   g = ggplot(df_res) +
-    geom_boxplot(aes(x = data_name, y = time_running, fill = algo_spec), show.legend = FALSE) +
-    facet_wrap(vars(algo_spec), ncol = 1) +
+    geom_boxplot(aes(x = algo_spec, y = time_running, fill = algo_spec), show.legend = FALSE) +
+    facet_wrap(vars(data_name), ncol = 1) +
     ylab("runtime in seconds") +
     xlab("") +
     scale_fill_manual(values = RColorBrewer::brewer.pal(n = n_colors, name = "Paired")) +
@@ -308,20 +308,20 @@ plot_comparison_ranks = function (methods = c("whatif", "nice", "moc"), orientat
       mutate(model_name = recode(model_name, logistic_regression = "logreg", neural_network = "neuralnet")) %>% 
       pivot_longer(c(dist_x_interest:dist_train, n), names_to = "objective") %>% 
       mutate(objective = factor(objective, levels = c("dist_x_interest", "no_changed", "dist_train", "n"))) %>% 
-      # mutate(algo_spec = recode(algo_spec, nice_sparsity = "nice", nice_proximity = "nice", nice_plausibility = "nice")) %>% 
+      mutate(objective = recode(objective, n = "no")) %>% 
       select(id_x_interest, model_name, algo_spec, objective, value)  %>% 
       filter(algo_spec %in% methods)
     
     # save info on number cfexp in extra dataset
-    res_n = temp %>% filter(objective == "n") %>% 
+    res_n = temp %>% filter(objective == "no") %>% 
       group_by(id_x_interest, model_name, algo_spec) %>%
       filter(row_number()==1)
     
     # calculate ranks per objective
     temp_rank = temp %>%
-      filter(objective != "n") %>%
+      filter(objective != "no") %>%
       group_by(id_x_interest, model_name, objective)%>%
-      group_modify(~ data.frame(cbind(.x, "n" = count(.x)))) %>%
+      group_modify(~ data.frame(cbind(.x, "no" = count(.x)))) %>%
         mutate(value = rank(value)/n) %>%
         arrange(model_name, id_x_interest, objective) %>%
         select(-n)
@@ -333,8 +333,8 @@ plot_comparison_ranks = function (methods = c("whatif", "nice", "moc"), orientat
   })
   names(aggrres) = data_set_names  
   ll = dplyr::bind_rows(aggrres, .id = "dataset")
-  ll$objective = factor(ll$objective, levels = c("dist_x_interest", "no_changed", "dist_train", "rank_nondom", "n"), 
-    labels = c("rank_dist_x_interest", "rank_no_changed", "rank_dist_train", "rank_nondom", "n"))
+  ll$objective = factor(ll$objective, levels = c("dist_x_interest", "no_changed", "dist_train", "rank_nondom", "no"), 
+    labels = c("rank_dist_x_interest", "rank_no_changed", "rank_dist_train", "rank_nondom", "no"))
   
   if (test) {
    create_test_df = function(data, subset = c("nice", "moc")) {
