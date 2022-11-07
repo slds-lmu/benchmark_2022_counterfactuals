@@ -72,8 +72,6 @@ svm_wrapper = function(data, job, instance, ...) {
   library(mlr3learners)
   library(mlr3pipelines)
   library(mlr3tuning)
-  
-  if (nrow(data) > 10000L) data = data[sample(.N, 10000L)] 
   tc = readRDS(file.path("models/tuning_config.RDS"))
   this_task = as_task_classif(data, target = names(data)[ncol(data)])
   
@@ -100,11 +98,24 @@ svm_wrapper = function(data, job, instance, ...) {
 lr_wrapper = function(data, job, instance, ...) {
   library(mlr3)
   library(mlr3learners)
-  target_name = names(data)[ncol(data)] 
-  this_task = as_task_classif(data, target = target_name)
-  lr_learner = lrn("classif.log_reg")
+  library(mlr3pipelines)
+  library(mlr3tuning)
+  this_task = as_task_classif(data, target = names(data)[ncol(data)])
+  
+  if (job$prob.name %in% c("diabetis", "tic_tac_toe", "credit_g")) {
+    lr_learner = po("classbalancing", adjust = "major", reference = "major", shuffle = FALSE, ratio = 1 / 2) %>>%
+      po("scale") %>>%
+      po("encode") %>>%
+      po(lrn("classif.log_reg", predict_type = "prob"))
+  } else {
+    lr_learner = po("scale") %>>%
+      po("encode") %>>%
+      po(lrn("classif.log_reg", predict_type = "prob"))
+  }
   lr_learner$train(this_task)
   lr_learner
+  
+  
 }
 
 
