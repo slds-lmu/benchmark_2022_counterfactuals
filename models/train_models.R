@@ -1,5 +1,5 @@
 rm(list = ls())
-set.seed(867853)
+set.seed(867854)
 data.table::setDTthreads(1L)
 #----
 # 0) Load helper functions & libraries
@@ -24,7 +24,7 @@ OVERWRITE <- TRUE
 if (file.exists(registry_dir)) {
   if (OVERWRITE) {
     unlink(registry_dir, recursive = TRUE)
-    reg = makeExperimentRegistry(file.dir = registry_dir, packages = packages, seed = 123L)
+    reg = makeExperimentRegistry(file.dir = registry_dir, packages = packages, seed = 1500L)
   } else {
     reg = loadRegistry(registry_dir, writeable = TRUE)
   }
@@ -86,3 +86,8 @@ if (!dir.exists(keras_save_dir)) {
 submitJobs()
 waitForJobs()
 getStatus()
+
+# Resubmit Jobs
+# gj = getJobPars(reg = reg)
+# logjobs = gj[gj$algorithm == "logistic_regression", "job.id"]
+# submitJobs(ids = logjobs)

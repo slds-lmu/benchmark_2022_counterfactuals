@@ -112,9 +112,10 @@ lr_wrapper = function(data, job, instance, ...) {
       po("encode") %>>%
       po(lrn("classif.log_reg", predict_type = "prob"))
   }
+  browser()
+  lr_learner = as_learner(lr_learner)
   lr_learner$train(this_task)
   lr_learner
-  
   
 }
 
