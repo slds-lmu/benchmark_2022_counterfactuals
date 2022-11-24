@@ -69,7 +69,7 @@ plot_comparison_ranks_with_lines = function (methods = c("whatif", "nice", "moc"
   n_colors = length(unique(ll$algo_spec))
   
   plt = ggplot(ll) +
-    geom_boxplot(aes(x = objective, y = value, fill = objective), show.legend = FALSE) 
+    geom_boxplot(aes(x = objective, y = value, fill = algo_spec), show.legend = FALSE) 
   #scale_x_discrete(limits = rev) 
   if (orientation == "model") {
     plt = plt +  facet_grid(model_name ~ algo_spec, scales = "free") 
@@ -78,9 +78,9 @@ plot_comparison_ranks_with_lines = function (methods = c("whatif", "nice", "moc"
     plt = plt + facet_grid(dataset ~ algo_spec, scales = "free")
     height = 6.5
   }
-
+    n_colors = length(methods)
     plt = plt + 
-    scale_fill_manual(values = RColorBrewer::brewer.pal(n = 4, name = "Paired")) +
+    scale_fill_manual(values = RColorBrewer::brewer.pal(n = n_colors, name = "Paired")) +
     theme_bw() +
     # coord_flip() +
     ylab("") + 
@@ -111,10 +111,10 @@ plot_hypervolume = function(methods = c("whatif", "nice", "moc")) {
     res = tbl(con, paste0(datanam, "_EVAL")) %>% collect()
     DBI::dbDisconnect(con)
   
-    # res$hypervolume = res$n
-    # res$no_counterfactuals = res$n
-    # res$no_nondom = res$n
-    # 
+    # res$hypervolume = runif(n = nrow(res), min = 0.1, max = 2)
+    # res$no_counterfactuals = sample(1:20, size = nrow(res), replace = TRUE)
+    # res$no_nondom = pmax(res$no_counterfactuals - 5L, 1L)
+
     res_hv = res %>% select(id_x_interest, model_name, algo_spec, hypervolume, 
       no_counterfactuals, no_nondom)  %>%
       filter(algo_spec %in% methods) %>%
@@ -135,7 +135,7 @@ plot_hypervolume = function(methods = c("whatif", "nice", "moc")) {
   n_colors = length(methods)
   plt = ggplot(ll) +
     geom_boxplot(aes(x = algo_spec , y = value, fill = algo_spec), show.legend = FALSE) + 
-    facet_grid(dataset ~ objective) +
+    facet_grid(objective ~ dataset, scales = "free") +
     scale_fill_manual(values = RColorBrewer::brewer.pal(n = n_colors, name = "Paired")) +
     theme_bw() +
     ylab("") + 
@@ -150,5 +150,3 @@ plot_hypervolume = function(methods = c("whatif", "nice", "moc")) {
   geom_line(aes(x = algo_spec, y = value, group=id), alpha=.1)
   return(plt)
 }
-
-plot_hypervolume()
