@@ -78,6 +78,7 @@ plot_comparison_ranks_with_lines = function (methods = c("whatif", "nice", "moc"
     plt = plt + facet_grid(dataset ~ algo_spec, scales = "free")
     height = 6.5
   }
+
     plt = plt + 
     scale_fill_manual(values = RColorBrewer::brewer.pal(n = 4, name = "Paired")) +
     theme_bw() +
@@ -90,7 +91,7 @@ plot_comparison_ranks_with_lines = function (methods = c("whatif", "nice", "moc"
       axis.text = element_text(size = 7),
       panel.spacing = unit(2, "pt")
     ) + 
-    geom_line(aes(x = objective, y = value, group=id), alpha=.1)
+    geom_line(aes(x = objective, y = value, group=id), alpha=.05)
 
   if (savepdf) {
     fig.path = "evaluation/figures"
@@ -113,7 +114,7 @@ plot_hypervolume = function(methods = c("whatif", "nice", "moc")) {
     # res$hypervolume = res$n
     # res$no_counterfactuals = res$n
     # res$no_nondom = res$n
-    
+    # 
     res_hv = res %>% select(id_x_interest, model_name, algo_spec, hypervolume, 
       no_counterfactuals, no_nondom)  %>%
       filter(algo_spec %in% methods) %>%

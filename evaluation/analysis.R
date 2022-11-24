@@ -5,12 +5,14 @@ library(ggplot2)
 library(tidyverse)
 library(ggpubr)
 source("evaluation/analysis_helper.R")
+source("evaluation/analysis_helper_additional.R")
 
 # see if for all models cfexp were produced
 p1 = check_cfexp_generated(models = "neural_network")
 # ggsave("evaluation/figures/nn_proportion.pdf", height = 4, width = 5, plot = p1)
 
 # plot objectives and n
+p = plot_comparison_ranks_with_lines(test = FALSE)
 p = plot_comparison_ranks(test = TRUE)
 p2 = plot_comparison_ranks(orientation = "dataset", test = TRUE)
 
