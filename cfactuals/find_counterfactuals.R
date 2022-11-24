@@ -48,11 +48,12 @@ for (i in seq_along(data_list)) {
 addAlgorithm(name = "whatif", fun = whatif_wrapper)
 addAlgorithm(name = "nice", fun = nice_wrapper)
 addAlgorithm(name = "moc", fun = moc_wrapper)
-addAlgorithm(name = "random_search", fun = random_search_wrapper)
+# addAlgorithm(name = "random_search", fun = random_search_wrapper)
 
 # Add experiments
 addExperiments(algo.designs = ades)
 summarizeExperiments()
+unwrap(getJobPars())
 
 # testJob(id = 14)
 
