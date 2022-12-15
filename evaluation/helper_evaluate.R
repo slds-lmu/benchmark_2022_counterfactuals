@@ -1,30 +1,35 @@
-comp_hv_contr = function(x) {
-  if (nrow(x) > 1) {
-    if (anyNA(x[, c("r1", "r2", "r3", "r4")])) {
-     res = NA
-    } else {
-      res = miesmuschel::domhv_contribution(
-        -as.matrix(rbind(x[, c("dist_target", "dist_train", "no_changed", "dist_x_interest")])),
-        ref.point = as.numeric(x[1L, c("r1", "r2", "r3", "r4")])
-      )
-    }
-  } else {
-    res = 1L
-  }
-  res
-}
+# comp_hv_contr = function(x) {
+#     if (anyNA(x[, c("r2", "r3", "r4")])) {
+#      res = NA
+#     } else {
+#       res = miesmuschel:::domhv(fitnesses = -as.matrix(rbind(x[, c("dist_x_interest", "no_changed", "dist_train")])),
+#         nadir = -as.numeric(x[1L, c("r2", "r3", "r4")])
+#       )
+#     }
+#   return(res)
+# }
 
 add_evals_to_db = function(data_set_name) {
   con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
   res = tbl(con, toupper(data_set_name)) %>% collect()
   
+  # # create lookup from moc for randomsearch for maximum values for hypervolume
+  # lookup = res %>% filter(algorithm == "moc") %>%
+  #   group_by(id_x_interest, model_name) %>%
+  #   summarize(r1 = 0.5, r2 = mean(r2, na.rm = TRUE), r3 = mean(r3, na.rm = TRUE), r4 = mean(r4, na.rm = TRUE))
+  # # 
   whatif = res %>% 
     filter(algorithm == "whatif") %>% 
-    mutate(algo_spec = "whatif") %>% 
+    # mutate(algo_spec = "whatif") %>% 
     group_by(id_x_interest, model_name) %>% 
     group_modify(~ data.frame(cbind(.x, "n" = count(.x)))) %>% 
     ungroup() %>% 
-    rename(no_counterfactuals = n)
+    rename(no_counterfactuals = n) # %>% 
+    # select(-r1, -r2, -r3, -r4) %>%
+    # left_join(lookup, by = c("model_name", "id_x_interest")) %>% 
+    # group_by(id_x_interest, model_name) %>% 
+    # group_modify(~ data.frame(cbind(.x, "dom_hv" = comp_hv_contr(.x)))) %>% 
+    # ungroup()
   
   # derive nondominated
    nondomindwi = whatif %>% group_by(id_x_interest, model_name) %>% 
@@ -53,7 +58,12 @@ add_evals_to_db = function(data_set_name) {
     group_by(id_x_interest, model_name) %>% 
     group_modify(~ data.frame(cbind(.x, "n" = count(.x)))) %>% 
     ungroup() %>% 
-    rename(no_counterfactuals = n)
+    rename(no_counterfactuals = n) # %>% 
+    # select(-r1, -r2, -r3, -r4) %>%
+    # left_join(lookup, by = c("model_name", "id_x_interest")) %>% 
+    # group_by(id_x_interest, model_name) %>% 
+    # group_modify(~ data.frame(cbind(.x, "dom_hv" = comp_hv_contr(.x)))) %>% 
+    # ungroup()
     # only keep nondominated
   nondomind = nice_all %>% group_by(id_x_interest, model_name) %>% 
     group_modify(~ broom::tidy(get_nondominated(cbind(.x$dist_x_interest, .x$no_changed, .x$dist_train)))) %>%  
@@ -97,8 +107,9 @@ add_evals_to_db = function(data_set_name) {
     group_modify(~ data.frame(cbind(.x, "n" = count(.x)))) %>%
     ungroup() %>% 
     rename(no_counterfactuals = n)  %>%
+    # group_by(id_x_interest, model_name) %>% 
     # group_modify(~ data.frame(cbind(.x, "dom_hv" = comp_hv_contr(.x)))) %>% 
-    # ungroup() %>% 
+    # ungroup() %>%
     # mutate(algo_spec = paste(algorithm, sep = "_")) %>% 
     # group_by(id_x_interest, model_name) %>%
       group_by(id_x_interest, model_name) %>% 
@@ -107,15 +118,11 @@ add_evals_to_db = function(data_set_name) {
       rename(no_nondom = n)
 
   
-  # # create lookup from moc for randomsearch for maximum values for hypervolume
-  # lookup = res %>% filter(algorithm == "moc") %>% 
-  #   group_by(id_x_interest, model_name, problem) %>% 
-  #   summarize(r1 = mean(r1, na.rm = TRUE), r2 = mean(r2, na.rm = TRUE), r3 = mean(r3, na.rm = TRUE), r4 = mean(r4, na.rm = TRUE))
-  # 
+ 
   # randomsearch = res %>% 
   #   filter(algorithm  == "random_search") %>% 
   #   select(-r1, -r2, -r3, -r4) %>% 
-  #   left_join(lookup, by = c("model_name", "problem", "id_x_interest")) %>%
+  #   left_join(lookup, by = c("model_name", "id_x_interest")) %>%
   #   group_by(id_x_interest, model_name) %>% 
   #   group_modify(~ data.frame(cbind(.x, "dom_hv" = comp_hv_contr(.x)))) %>% 
   #   ungroup() %>% 

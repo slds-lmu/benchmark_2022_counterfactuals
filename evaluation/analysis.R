@@ -4,6 +4,7 @@ library(data.table)
 library(ggplot2)
 library(tidyverse)
 library(ggpubr)
+library(scales)
 source("evaluation/analysis_helper.R")
 source("evaluation/analysis_helper_additional.R")
 
@@ -12,7 +13,9 @@ p1 = check_cfexp_generated(models = "neural_network")
 # ggsave("evaluation/figures/nn_proportion.pdf", height = 4, width = 5, plot = p1)
 
 # plot objectives and n
-p = plot_comparison_ranks_with_lines(test = FALSE)
+plot_comparison_ranks_with_lines(nummin = 1L)
+plot_comparison_ranks_with_lines(orientation = "dataset")
+plot_hypervolume()
 p = plot_comparison_ranks(test = TRUE)
 p2 = plot_comparison_ranks(orientation = "dataset", test = TRUE)
 
