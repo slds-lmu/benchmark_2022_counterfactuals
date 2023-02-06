@@ -112,7 +112,6 @@ lr_wrapper = function(data, job, instance, ...) {
       po("encode") %>>%
       po(lrn("classif.log_reg", predict_type = "prob"))
   }
-  browser()
   lr_learner = as_learner(lr_learner)
   lr_learner$train(this_task)
   lr_learner
@@ -121,12 +120,12 @@ lr_wrapper = function(data, job, instance, ...) {
 
 
 nn_wrapper = function(data, job, instance, ...) {
+
   library(mlr3)
   library(mlr3learners)
   library(mlr3pipelines)
   library(mlr3tuning)
   library(mlr3keras)
-  reticulate::use_condaenv("mlr3keras")
   
   if (job$prob.name %in% c("diabetis", "tic_tac_toe", "credit_g")) {
     pos = po("classbalancing", adjust = "major", reference = "major", shuffle = FALSE, ratio = 1 / 2)  %>>% 
@@ -137,6 +136,7 @@ nn_wrapper = function(data, job, instance, ...) {
   
   target_name = names(data)[ncol(data)] 
   processed_data = pos$train(as_task_classif(data, target = target_name))[[1L]]$data()
+  
   this_task = as_task_classif(processed_data, target = target_name)
   
   tc = readRDS(file.path("models/tuning_config.RDS"))
@@ -158,17 +158,22 @@ nn_wrapper = function(data, job, instance, ...) {
     return(x)
   }
   
-  nn_learner = lrn("classif.kerasff", predict_type = "prob", epochs = 500L, model = NULL, validation_split = 1/3,
-                   callbacks = list(cb_es(monitor = "val_loss", patience = 5L)))
-  
-  at = AutoTuner$new(
-    learner = nn_learner,
-    resampling = tc$resampling,
-    measure = tc$measure,
-    search_space = tune_ps,
-    terminator = tc$terminator,
-    tuner = tc$tuner
-  )
+  if (job$prob.name == "hill_valley") {
+     at = lrn("classif.deep_wide", predict_type = "prob", epochs = 500L, 
+                      validation_split = 1/3, callbacks = list(cb_es(monitor = "val_loss", patience = 5L)))
+  } else {
+     nn_learner = lrn("classif.kerasff", predict_type = "prob", epochs = 500L, 
+                      model = NULL, validation_split = 1/3,
+                      callbacks = list(cb_es(monitor = "val_loss", patience = 5L)))
+      at = AutoTuner$new(
+        learner = nn_learner,
+        resampling = tc$resampling,
+        measure = tc$measure,
+        search_space = tune_ps,
+        terminator = tc$terminator,
+        tuner = tc$tuner
+      )
+  }
   at$train(this_task)
   rr = resample(this_task, at, tc$outer_resampling, store_models = TRUE)
   
@@ -177,8 +182,12 @@ nn_wrapper = function(data, job, instance, ...) {
   if (!dir.exists(path)) dir.create(path)
   saveRDS(rr, file.path(path, paste0(job$prob.name, "_rr.rds")))
   saveRDS(pos, file.path(path, paste0(job$prob.name, "_po.rds")))
-  at$learner$save(file.path(path, paste0(job$prob.name, "_model.hdf5")))
-  at
+  if (job$prob.name  == "hill_valley") {
+    at$save(file.path(path, paste0(job$prob.name, "_model.hdf5")))
+  } else {
+    at$learner$save(file.path(path, paste0(job$prob.name, "_model.hdf5")))
+  }
+    at
 }
 
 
