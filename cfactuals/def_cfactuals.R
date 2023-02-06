@@ -20,10 +20,6 @@ ades = list(
   moc = CJ(
     id_x_interest = 1:10,
     model_name = models
-  ),
-  random_search = CJ(
-    id_x_interest = 1:10,
-    model_name = models
   )
 )
 
