@@ -72,6 +72,9 @@ svm_wrapper = function(data, job, instance, ...) {
   library(mlr3learners)
   library(mlr3pipelines)
   library(mlr3tuning)
+
+  if (nrow(data) > 10000L) data = data[sample(.N, 10000L)]
+
   tc = readRDS(file.path("models/tuning_config.RDS"))
   this_task = as_task_classif(data, target = names(data)[ncol(data)])
   
@@ -85,7 +88,6 @@ svm_wrapper = function(data, job, instance, ...) {
       po("encode") %>>%
       po(lrn("classif.svm", predict_type = "prob", type = "C-classification", scale = FALSE))
   }
-
   mod$keep_results = TRUE
   tune_ps = paradox::ParamSet$new(list(
     paradox::ParamDbl$new("classif.svm.cost", lower = 0.01, upper = 1)))
