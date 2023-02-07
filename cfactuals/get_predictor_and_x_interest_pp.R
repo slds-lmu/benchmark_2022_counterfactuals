@@ -50,7 +50,7 @@ get_predictor_and_x_interest_pp = function(arg_list, job, data) {
     # }
     model_job_params = unwrap(getJobPars(reg = model_registry))  
     job_id = model_job_params[problem == prob_name & algorithm == arg_list$model_name]
-    this_model = loadResult(id = job_id, reg = model_registry)
+    this_model = readRDS(file.path("models/prod/registry", "results", paste0(job_id$job.id, ".rds")))
     pred = Predictor$new(this_model, data = data, y = target_name, type = "prob" )
   }
   pred
