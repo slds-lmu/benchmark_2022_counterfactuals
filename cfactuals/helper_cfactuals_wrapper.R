@@ -17,6 +17,7 @@ whatif_wrapper = function(data, job, instance, ...) {
   # save info on runtime and calls to fhat
   res = get_cf_table(cfactuals, job)
   attr(res, "runtime") = as.numeric(end_time - start_time)
+  return(res)
 }
 
 # NICE
@@ -39,6 +40,7 @@ nice_wrapper = function(data, job, instance, ...) {
   # save info on runtime and calls to fhat
   res = get_cf_table(cfactuals, job)
   attr(res, "runtime") = as.numeric(end_time - start_time)
+  return(res)
 }
 
 # MOC
@@ -65,6 +67,7 @@ moc_wrapper = function(data, job, instance, ...) {
   # save info on runtime and calls to fhat
   res = get_cf_table(cfactuals, job)
   attr(res, "runtime") = as.numeric(end_time - start_time)
+  return(res)
 }
 
 # Function to create results table
