@@ -133,10 +133,9 @@ check_cfexp_generated = function(data_set_name, models = NULL) {
   for (data_name in c("diabetis", "tic_tac_toe", "credit_g", "run_or_walk_info", "hill_valley", "bank8FM")) {
     if (data_name == "overall") next
     res_df = tbl(con, paste0(data_name, "_EVAL")) %>% collect() %>% 
-      select(id_x_interest, algo_spec, model_name) %>% 
-      mutate(algo_spec = recode(algo_spec, nice_sparsity = "nice", nice_proximity = "nice", nice_plausibility = "nice")) %>%
+      select(id_x_interest, algorithm, model_name) %>% 
       distinct() %>% 
-      group_by(algo_spec, model_name) %>% 
+      group_by(algorithm, model_name) %>% 
       summarise(proportion = n_distinct(id_x_interest)/10) %>% 
       mutate(data_name = data_name)
     if (!is.null(models)) {
@@ -155,7 +154,7 @@ check_cfexp_generated = function(data_set_name, models = NULL) {
   
   if (is.null(models)) {
     ro = do.call(rbind, res)
-    ro = ro %>% group_by(algo_spec, model_name) %>% summarise(proportion = mean(proportion)) %>% 
+    ro = ro %>% group_by(algorithm, model_name) %>% summarise(proportion = mean(proportion)) %>% 
       mutate(data_name = "overall")
     res[["overall"]] = ro
     
@@ -177,7 +176,7 @@ check_cfexp_generated = function(data_set_name, models = NULL) {
     #     )
     #   )
     p = ggplot(plt_data) +
-      geom_tile(aes(x = model_name, y = algo_spec, fill = proportion), color = "white",
+      geom_tile(aes(x = model_name, y = algorithm, fill = proportion), color = "white",
         lwd = 1.5,
         linetype = 1) +
       theme_bw() +
@@ -191,7 +190,7 @@ check_cfexp_generated = function(data_set_name, models = NULL) {
   } else {
     
     ro = do.call(rbind, res)
-    ro = ro %>% group_by(algo_spec, model_name) %>% summarise(proportion = mean(proportion)) %>% 
+    ro = ro %>% group_by(algorithm, model_name) %>% summarise(proportion = mean(proportion)) %>% 
       mutate(data_name = "overall")
     res[["overall"]] = ro
     
@@ -212,7 +211,7 @@ check_cfexp_generated = function(data_set_name, models = NULL) {
     #     )
     #   )
     p = ggplot(plt_data) +
-      geom_tile(aes(x = data_name, y = algo_spec, fill = proportion), color = "white",
+      geom_tile(aes(x = data_name, y = algorithm, fill = proportion), color = "white",
         lwd = 1.5,
         linetype = 1) +
       theme_bw() +

@@ -14,8 +14,7 @@ add_results_to_db = function(data_set_name, reg) {
     if (inherits(cfactuals, "try-error")) next
     print(job_id)
     if (nrow(cfactuals) > 0L) {
-      dt_standard = cbind(cfactuals, this_job, "time_running" = as.numeric(attr(cfactuals, "time_running")),
-        as.numeric(attr(cfactuals, "evalsets")))
+      dt_standard = cbind(cfactuals, this_job, "time_running" = as.numeric(attr(cfactuals, "time_running")))
       if (!toupper(data_set_name) %in% DBI::dbListTables(con)) {
         dbWriteTable(con, toupper(data_set_name), as.data.frame(dt_standard), overwrite = TRUE)
       } else {

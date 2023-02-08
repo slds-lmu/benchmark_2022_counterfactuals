@@ -8,8 +8,6 @@ plot_comparison_ranks_with_lines = function (methods = c("whatif", "nice", "moc"
     con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
     res = tbl(con, paste0(datanam, "_EVAL")) %>% collect()
     DBI::dbDisconnect(con)
-   # res = res %>% rename(no_counterfactuals = n)
-  #   res$no_nondom = res$no_counterfactuals
 
     temp = res %>%
       select(-dist_target) %>%
@@ -121,7 +119,7 @@ plot_comparison_ranks_with_lines = function (methods = c("whatif", "nice", "moc"
 
 
 plot_hypervolume = function(methods = c("whatif", "nice", "moc"), savepdf = TRUE) {
-  data_set_names = c("credit_g", "diabetis", "tic_tac_toe", "bank8FM",  "hill_valley", "run_or_walk_info")
+  data_set_names = c("credit_g", "diabetis", "tic_tac_toe", "bank8FM", "run_or_walk_info")
   aggrres = lapply(data_set_names, function(datanam) {
     con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
     res = tbl(con, paste0(datanam, "_EVAL")) %>% collect()
@@ -131,7 +129,7 @@ plot_hypervolume = function(methods = c("whatif", "nice", "moc"), savepdf = TRUE
    #  res$hypervolume = res$dom_hv
 
     res_hv = res %>% select(id_x_interest, model_name, algorithm, hypervolume, 
-      no_counterfactuals, no_nondom)  %>%
+      no_overall, no_nondom)  %>%
       filter(algorithm %in% methods) %>%
       group_by(id_x_interest, model_name, algorithm) %>%
       filter(row_number()==1) 
@@ -143,8 +141,8 @@ plot_hypervolume = function(methods = c("whatif", "nice", "moc"), savepdf = TRUE
   ll = ll %>% group_by(id_x_interest, model_name, dataset) %>%
     mutate(id = cur_group_id())
   
-  ll = ll %>% pivot_longer(c(hypervolume, no_nondom, no_counterfactuals), names_to = "objective")
-  ll$objective = factor(ll$objective, levels = c("hypervolume", "no_nondom", "no_counterfactuals"), 
+  ll = ll %>% pivot_longer(c(hypervolume, no_nondom, no_overall), names_to = "objective")
+  ll$objective = factor(ll$objective, levels = c("hypervolume", "no_nondom", "no_overall"), 
     labels = c("hypervolume", "no. nondom", "no. overall"))
   ll$dataset = factor(ll$dataset, levels = data_set_names, labels = data_set_names)
   

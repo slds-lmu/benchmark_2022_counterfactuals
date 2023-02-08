@@ -77,6 +77,7 @@ get_cf_table = function(cfactuals_obj, this_job) {
   dt_standard = data.table()
   if (nrow(cfactuals_obj$data) > 0L) {
     cfactuals_obj$subset_to_valid()
+    if (nrow(cfactuals_obj$data) > 0L) {
     cfactuals = cfactuals_obj$evaluate()
     # get other evaluation criteria
     cfactuals_no = nrow(cfactuals)
@@ -84,19 +85,16 @@ get_cf_table = function(cfactuals_obj, this_job) {
     if (is.null(cfactuals_no_nondom)) cfactuals_no_nondom = 0
     fitnesses = -as.matrix(rbind(
         cfactuals[, c("dist_target", "dist_x_interest", "no_changed", "dist_train")]))
-    if (nrow(cfactuals) > 0) {
      cfactuals = cfactuals[miesmuschel::rank_nondominated(fitnesses)$fronts == 1,] 
      cfactuals_hv = miesmuschel:::domhv(
       fitnesses = -as.matrix(rbind(
         cfactuals[, c("dist_x_interest", "no_changed", "dist_train")])),
          nadir = -c(1, ncol(cfactuals_obj$x_interest), 1))
-    } else {
-      cfactuals_hv = 0
-    }
-    dt_standard = cbind(cfactuals, "job.id" = this_job$id, 
-                        "no_overall" = cfactuals_no, 
-                        "no_nondom" = cfactuals_no_nondom, 
-                        "hypervolume" = cfactuals_hv)
+     dt_standard = cbind(cfactuals, "job.id" = this_job$id, 
+       "no_overall" = cfactuals_no, 
+       "no_nondom" = cfactuals_no_nondom, 
+       "hypervolume" = cfactuals_hv)
+    } 
   }
   return(dt_standard)
 }
