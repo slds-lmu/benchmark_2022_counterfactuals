@@ -20,7 +20,7 @@ Paper: link will be shared soon.
 ### 3) Counterfactuals (cfactuals/)
 
 - Runs the counterfactuals methods for all datasets, `x_interest`, and parameter configurations and stores the counterfactuals as `counterfactuals::Counterfactuals` objects.
-- Counterfactual methods: WhatIf, NICE, MOC, RandomSearch
+- Counterfactual methods: WhatIf, NICE, MOC
 - Main functions: `find_counterfactuals.R`
 
 ### 4) Evaluation (evaluation/)
