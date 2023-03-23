@@ -43,7 +43,3 @@ in a sql_lite database (`db_evals.db`) for quick retrieval
 - Creates box plots for comparing the speed of the different methods
 - All data are queried from the database `db_evals.db`
 - Main functions: `analysis.R`
-
-Quality comparison            |  Speed comparison
-:-------------------------:|:-------------------------:
-<img src="https://user-images.githubusercontent.com/25373845/172850210-5c4432e1-b928-4bf2-9cd6-ab6e7244dee4.png" width="100%" height="100%">  |  <img src="https://user-images.githubusercontent.com/25373845/172850933-089487c0-8915-499f-a556-6d935a4e96a3.png" width="100%" height="100%"> 
