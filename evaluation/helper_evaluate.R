@@ -62,7 +62,7 @@ add_evals_to_db = function(data_set_name) {
     summarise(time_running = sum(time_running, na.rm = TRUE), 
               no_overall = sum(no_overall, na.rm = TRUE)) %>% 
     ungroup()
-
+  
   nice_all = res %>% 
     filter(algorithm  == "nice") %>% 
     # add overall runtime from lookup
@@ -77,11 +77,12 @@ add_evals_to_db = function(data_set_name) {
   nondomind = nice_all %>% group_by(id_x_interest, model_name) %>% 
     group_modify(~ broom::tidy(get_nondominated(cbind(.x$dist_x_interest, .x$no_changed, .x$dist_train)))) %>%  
     ungroup()
+
   nice_all = nice_all %>% 
       mutate(nondom = nondomind$x) %>%
             filter(nondom) %>%
       # remove duplicates
-      distinct_at(vars(-job.id, -optimization, -ID, -time_running), .keep_all = TRUE) %>% 
+      distinct_at(vars(-job.id, -optimization, -ID, -time_running, -hypervolume), .keep_all = TRUE) %>% 
       # # only keep 4 counterfactuals per optimizations strategy
       # # group_by(id_x_interest, model_name, optimization) %>% 
       # # mutate(rank = dense_rank(desc(no_changed))) %>% 

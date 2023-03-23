@@ -81,7 +81,7 @@ plot_comparison_ranks_with_lines = function (methods = c("whatif", "nice", "moc"
       ungroup() %>% 
       select(model_name, algorithm, id, dataset)
     plt = plt +  facet_grid(model_name ~ algorithm, scales = "free") 
-    height = 7
+    height = 5
   } else if (orientation == "dataset") {
     minid = ll %>% 
       group_by(dataset, objective, algorithm) %>%
@@ -105,7 +105,7 @@ plot_comparison_ranks_with_lines = function (methods = c("whatif", "nice", "moc"
     colorlines = "tan4"
     plt = plt + 
     geom_line(data = mindata, aes(x = objective, y = value, group = id), alpha = 0.5, lwd = 1, color = "tan4", lty = 1) +
-    geom_line(aes(x = objective, y = value, group=id), alpha=.05, color = "grey20") 
+    geom_line(aes(x = objective, y = value, group=id), alpha=.03, color = "grey20") 
 
   if (savepdf) {
     fig.path = "evaluation/figures"
@@ -118,8 +118,8 @@ plot_comparison_ranks_with_lines = function (methods = c("whatif", "nice", "moc"
 }
 
 
-plot_hypervolume = function(methods = c("whatif", "nice", "moc"), savepdf = TRUE) {
-  data_set_names = c("credit_g", "diabetis", "tic_tac_toe", "bank8FM", "run_or_walk_info")
+plot_hypervolume = function(methods = c("whatif", "nice", "moc"), log = TRUE, savepdf = TRUE) {
+  data_set_names = c("credit_g", "diabetis", "tic_tac_toe", "bank8FM", "hill_valley", "run_or_walk_info")
   aggrres = lapply(data_set_names, function(datanam) {
     con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
     res = tbl(con, paste0(datanam, "_EVAL")) %>% collect()
@@ -142,8 +142,16 @@ plot_hypervolume = function(methods = c("whatif", "nice", "moc"), savepdf = TRUE
     mutate(id = cur_group_id())
   
   ll = ll %>% pivot_longer(c(hypervolume, no_nondom, no_overall), names_to = "objective")
+  
+  if (log) {
+    ll$value = log(ll$value)
+    nams = c("log(hypervolume)", "log(no. nondom)", "log(no. overall)")
+  } else {
+    nams = c("hypervolume", "no. nondom", "no. overall")
+  }
+  
   ll$objective = factor(ll$objective, levels = c("hypervolume", "no_nondom", "no_overall"), 
-    labels = c("hypervolume", "no. nondom", "no. overall"))
+    labels = nams)
   ll$dataset = factor(ll$dataset, levels = data_set_names, labels = data_set_names)
   
   n_colors = length(methods)
@@ -166,7 +174,7 @@ plot_hypervolume = function(methods = c("whatif", "nice", "moc"), savepdf = TRUE
   if (savepdf) {
     fig.path = "evaluation/figures"
     dir.create(fig.path, showWarnings = FALSE)
-    ggsave(filename = file.path(fig.path, "hv_no_nondom.pdf"), plot = plt, width = 7, height = 5.5) # 5.5, 3.8
+    ggsave(filename = file.path(fig.path, "hv_no_nondom.pdf"), plot = plt, width = 7, height = 4.5) # 5.5, 3.8
   }
   return(plt)
 }
