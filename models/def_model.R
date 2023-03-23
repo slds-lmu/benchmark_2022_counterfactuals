@@ -22,5 +22,5 @@ algos <- c(
 
 # BATCHTOOLS configurations
 n_cores <- 15L
-registry_dir <- "models/prod/registry_logreg"
+registry_dir <- "models/prod/registry"
 if (!dir.exists(dirname(registry_dir))) dir.create(dirname(registry_dir))
