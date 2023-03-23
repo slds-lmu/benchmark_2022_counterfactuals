@@ -33,7 +33,7 @@ in a sql_lite database (`db_evals.db`) for quick retrieval
 
 #### 4.2) Evaluate
 
-- Evaluates the counterfactuals and applies the strategies mentioned in the paper to limit the number of counterfactuals for each algorithm to 10
+- Evaluates the counterfactuals and applies the strategies mentioned in the paper
 - It then stores the results in a clean data format in separate `_EVAL` tables
 - Main functions: `evaluate.R`
 
