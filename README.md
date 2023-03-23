@@ -47,23 +47,3 @@ in a sql_lite database (`db_evals.db`) for quick retrieval
 Quality comparison            |  Speed comparison
 :-------------------------:|:-------------------------:
 <img src="https://user-images.githubusercontent.com/25373845/172850210-5c4432e1-b928-4bf2-9cd6-ab6e7244dee4.png" width="100%" height="100%">  |  <img src="https://user-images.githubusercontent.com/25373845/172850933-089487c0-8915-499f-a556-6d935a4e96a3.png" width="100%" height="100%"> 
-
-### 5) Evaluation hypervolume (evaluation-hv/)
-
-#### 5.1) DB setup
-
-- Reads in the `counterfactuals::Counterfactuals` objects for all MOC configurations and stores the hypervolumes for each generation and some metainfo (such as the algorithm name and configurations)
-in a sql_lite database (`db_evals_hv.db`) for quick retrieval
-- Main functions: `db_setup_hv.R`
-
-#### 5.2) Analysis
-
-- Creates a facet grid with line graphs showing the hypervolume evolution over the generations for all MOC configurations overall and for each dataset separately!
-
-- All data are queried from the database `db_setup_hv.db`
-- Main functions: `analysis_hv.R`
-
-<p align="center">
-  <img width="60%" height="60%" src="https://user-images.githubusercontent.com/25373845/172851429-78ac1940-ea01-4a3f-b951-f890535886b9.png">
-</p>
-
