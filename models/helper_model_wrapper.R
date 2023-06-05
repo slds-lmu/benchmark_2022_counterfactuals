@@ -26,7 +26,7 @@ ranger_wrapper = function(data, job, instance, ...) {
     x
   }
   mod = GraphLearner$new(mod)
-  at = AutoTuner$new(mod, tc$resampling, tc$measure, tc$terminator, tc$tuner, tune_ps)
+  at = AutoTuner$new(tuner = tc$tuner, learner = mod, resampling = tc$resampling, measure = tc$measure, terminator = tc$terminator, search_space = tune_ps)
   at$train(this_task)
   at
   
@@ -61,7 +61,7 @@ xgboost_wrapper = function(data, job, instance, ...) {
     x
   }
   mod = GraphLearner$new(mod)
-  at = AutoTuner$new(mod, tc$resampling, tc$measure, tc$terminator, tc$tuner, tune_ps)
+  at = AutoTuner$new(tuner = tc$tuner, learner = mod, resampling = tc$resampling, measure = tc$measure, terminator = tc$terminator, search_space = tune_ps)
   at$train(this_task)
   at
 }
@@ -92,7 +92,7 @@ svm_wrapper = function(data, job, instance, ...) {
   tune_ps = paradox::ParamSet$new(list(
     paradox::ParamDbl$new("classif.svm.cost", lower = 0.01, upper = 1)))
   mod = GraphLearner$new(mod)
-  at = AutoTuner$new(mod, tc$resampling, tc$measure, tc$terminator, tc$tuner, tune_ps)
+  at = AutoTuner$new(tuner = tc$tuner, learner = mod, resampling = tc$resampling, measure = tc$measure, terminator = tc$terminator, search_space = tune_ps)
   at$train(this_task)
   at
 }
