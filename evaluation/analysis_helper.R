@@ -68,10 +68,18 @@ plot_comparison_ranks_with_lines = function (methods = c("whatif", "nice", "moc"
       axis.text.y = element_text(size = 8),
       panel.spacing = unit(2, "pt")
     ) 
+  n_sample = 2000
+  sampdata = ll %>% 
+      group_by(model_name, objective, algorithm) %>%
+      sample_n(min(n(), n_sample)) %>%
+      # slice_sample(n = n_sample) %>% 
+      ungroup() 
+  # sampdata %>% group_by(model_name, objective, algorithm) %>%
+  #   summarise(n = n())
   colorlines = "tan4"
     plt = plt + 
       geom_line(data = mindata, aes(x = objective, y = value, group = id), alpha = 0.5, lwd = 1, color = "tan4", lty = 1) +
-      geom_line(aes(x = objective, y = value, group=id), alpha=.03, color = "grey20") 
+      geom_line(data = sampdata, aes(x = objective, y = value, group=id), alpha=.03, color = "grey20") 
     
     if (savepdf) {
       fig.path = "evaluation/figures"
@@ -98,7 +106,7 @@ plot_hypervolume = function(methods = c("whatif", "nice", "moc"), log = TRUE, sa
       no_overall, no_nondom)  %>%
       filter(algorithm %in% methods) %>%
       group_by(id_x_interest, model_name, algorithm) %>%
-      filter(row_number()==1) 
+      filter(hypervolume == max(hypervolume)) 
     
     return(res_hv)
   })
@@ -247,6 +255,7 @@ plot_speed_comparison = function(type = "n", methods = c("moc", "nice" , "whatif
   savepdf = FALSE) {
   df_res = speed_comparison(type, methods)
   n_colors = length(methods)
+  browser()
   # df_res %>% group_by(data_name, algorithm) %>% summarise_at(vars(-id_x_interest, -model_name),  funs(mean(., na.rm=TRUE)))
   g = ggplot(df_res) +
     geom_boxplot(aes(x = algorithm, y = time_running, fill = algorithm), show.legend = FALSE) +
