@@ -1,5 +1,4 @@
 # Benchmarking repository 
-Paper: link will be shared soon.
 
 ## Structure
 
@@ -43,3 +42,12 @@ in a sql_lite database (`db_evals.db`) for quick retrieval
 - Creates box plots for comparing the speed of the different methods
 - All data are queried from the database `db_evals.db`
 - Main functions: `analysis.R`
+
+
+## Runtimes & system requirements
+Training the model and generating the counterfactuals was conducted in parallel on a computer with a 2.60 GHz Intel(R) Xeon(R) processor, and 32 CPUs.
+Runtimes: 
+1) Data: < 1 minute
+2) Models: running `train_models.R` took overall 53 hours spread over 15 CPUS, resample.R took ~ 116 hours.
+3) Counterfals: running `find_counterfactuals.R` took ~ 37 hours spread over 14 CPUS
+4) Evaluation: running `db_setup.R` took a few minutes, `evaluate.R` < 1 minute.
