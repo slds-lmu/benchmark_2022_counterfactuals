@@ -277,7 +277,6 @@ plot_speed_comparison = function(type = "n", methods = c("moc", "nice" , "whatif
   savepdf = FALSE) {
   df_res = speed_comparison(type, methods)
   n_colors = length(methods)
-  browser()
   # df_res %>% group_by(data_name, algorithm) %>% summarise_at(vars(-id_x_interest, -model_name),  funs(mean(., na.rm=TRUE)))
   g = ggplot(df_res) +
     geom_boxplot(aes(x = algorithm, y = time_running, fill = algorithm), show.legend = FALSE) +
