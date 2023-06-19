@@ -1,11 +1,20 @@
 plot_comparison_ranks_with_lines = function (methods = c("whatif", "nice", "moc"), orientation = "model", nummin = 1L, savepdf = TRUE) {
-  data_set_names = c("credit_g", "diabetis", "tic_tac_toe", "bank8FM", "hill_valley", "run_or_walk_info")
+
+  if (TEST) {
+    data_set_names = c("diabetis")
+  } else {
+    data_set_names = c("credit_g", "diabetis", "tic_tac_toe", "bank8FM", "hill_valley", "run_or_walk_info")
+  }
   
   checkmate::assert_names(orientation, subset.of = c("model", "dataset"))
   
   # loop through dataset to compute ranks of objectives, average these over the datapoints
   aggrres = lapply(data_set_names, function(datanam) {
-    con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
+    if (TEST) {
+      con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals_test.db")
+    } else {
+      con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
+    }
     res = tbl(con, paste0(datanam, "_EVAL")) %>% collect()
     DBI::dbDisconnect(con)
     
@@ -81,7 +90,7 @@ plot_comparison_ranks_with_lines = function (methods = c("whatif", "nice", "moc"
       geom_line(data = mindata, aes(x = objective, y = value, group = id), alpha = 0.5, lwd = 1, color = "tan4", lty = 1) +
       geom_line(data = sampdata, aes(x = objective, y = value, group=id), alpha=.03, color = "grey20") 
     
-    if (savepdf) {
+    if (savepdf & !TEST) {
       fig.path = "evaluation/figures"
       dir.create(fig.path, showWarnings = FALSE)
       ggsave(filename = file.path(fig.path, paste0(paste("overall", orientation,
@@ -93,9 +102,18 @@ plot_comparison_ranks_with_lines = function (methods = c("whatif", "nice", "moc"
 
 
 plot_hypervolume = function(methods = c("whatif", "nice", "moc"), log = TRUE, savepdf = TRUE) {
-  data_set_names = c("credit_g", "diabetis", "tic_tac_toe", "bank8FM", "hill_valley", "run_or_walk_info")
+  
+  if (TEST) {
+    data_set_names = c("diabetis")
+  } else {
+    data_set_names = c("credit_g", "diabetis", "tic_tac_toe", "bank8FM", "hill_valley", "run_or_walk_info")
+  }
   aggrres = lapply(data_set_names, function(datanam) {
-    con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
+    if (TEST) {
+      con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals_test.db")
+    } else {
+      con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
+    }
     res = tbl(con, paste0(datanam, "_EVAL")) %>% collect()
     DBI::dbDisconnect(con)
     
@@ -145,7 +163,7 @@ plot_hypervolume = function(methods = c("whatif", "nice", "moc"), log = TRUE, sa
   plt = plt +
     geom_line(aes(x = algorithm, y = value, group=id), alpha=.1)
   
-  if (savepdf) {
+  if (savepdf & !TEST) {
     fig.path = "evaluation/figures"
     dir.create(fig.path, showWarnings = FALSE)
     ggsave(filename = file.path(fig.path, "hv_no_nondom.pdf"), plot = plt, width = 7, height = 4.5) # 5.5, 3.8
@@ -156,7 +174,11 @@ plot_hypervolume = function(methods = c("whatif", "nice", "moc"), log = TRUE, sa
 
 plot_comparison = function(data_set_name, methods = c("whatif", "nice", "moc"), savepdf = TRUE) {
   
-  con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
+  if (TEST) {
+    con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals_test.db")
+  } else {
+    con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
+  }
   res = tbl(con, paste0(data_set_name, "_EVAL")) %>% collect()
   DBI::dbDisconnect(con)
   
@@ -197,7 +219,7 @@ plot_comparison = function(data_set_name, methods = c("whatif", "nice", "moc"), 
       axis.text = element_text(size = 7),
       panel.spacing = unit(2, "pt")
     )
-  if (savepdf) {
+  if (savepdf & !TEST) {
     fig.path = "evaluation/figures"
     dir.create(fig.path, showWarnings = FALSE)
     ggsave(filename = file.path(fig.path, paste0(paste(data_set_name, "obj_all", sep = "_"), ".pdf")), plot = plt, width = 5.5, height = 3.8) # 5.5, 3.8
@@ -255,7 +277,6 @@ plot_speed_comparison = function(type = "n", methods = c("moc", "nice" , "whatif
   savepdf = FALSE) {
   df_res = speed_comparison(type, methods)
   n_colors = length(methods)
-  browser()
   # df_res %>% group_by(data_name, algorithm) %>% summarise_at(vars(-id_x_interest, -model_name),  funs(mean(., na.rm=TRUE)))
   g = ggplot(df_res) +
     geom_boxplot(aes(x = algorithm, y = time_running, fill = algorithm), show.legend = FALSE) +
@@ -273,7 +294,7 @@ plot_speed_comparison = function(type = "n", methods = c("moc", "nice" , "whatif
       axis.text.x = element_text(angle = 60, vjust = 1, hjust=1)
     ) +
     scale_y_continuous(labels = function(x) format(x, big.mark = ",", scientific = FALSE))
-  if (savepdf) {
+  if (savepdf & !TEST) {
     fig.path = "evaluation/figures"
     dir.create(fig.path, showWarnings = FALSE)
     ggsave(filename = file.path(fig.path, paste0(paste(type, "runtime", sep = "_"), ".pdf")), plot = g, width = 3.5, height = 4)

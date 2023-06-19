@@ -10,11 +10,10 @@ TEST = FALSE
 source("cfactuals/libs_cfactuals.R")
 source("cfactuals/helper_cfactuals_wrapper.R")
 source("cfactuals/get_predictor_and_x_interest_pp.R")
+source("cfactuals/def_cfactuals.R")
 
 if (TEST) {
-  source("cfactuals/def_cfactuals_test.R")
-} else {
-  source("cfactuals/def_cfactuals.R")
+  registry_dir = paste0(registry_dir, "_TEST")
 }
 
 # Create registry
@@ -54,12 +53,17 @@ addExperiments(algo.designs = ades)
 summarizeExperiments()
 unwrap(getJobPars())
 
-# testJob(id = 14)
-
 # Run
-submitJobs()
-waitForJobs()
-getStatus()
-
-getErrorMessages()
+if (TEST) {
+  ### for TEST only run logistic regression and only one dataset
+  lmdiabetisids = unwrap(getJobPars())[model_name == "logistic_regression" & problem == "diabetis" & id_x_interest == 1L, "job.id"]
+  for (i in lmdiabetisids$job.id) {
+    res = testJob(id = i)
+    saveRDS(res, file = paste0(file.path(reg$file.dir, "results/"), i, ".rds"))
+  }
+} else {
+  submitJobs()
+  waitForJobs()
+  getStatus()
+}
 

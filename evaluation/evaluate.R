@@ -6,6 +6,8 @@ library(data.table)
 
 source("evaluation/helper_evaluate.R")
 
+TEST = FALSE
+
 # Run db_setup.R first
 
 add_evals_to_db("diabetis")
