@@ -2,8 +2,15 @@ library(mlr3)
 library(batchtools)
 library(mlr3tuning)
 
-model_registry = loadRegistry("models/prod/registry", make.default = FALSE)
-model_job_params = unwrap(getJobPars(reg = model_registry))  
+TEST = FALSE
+
+if (TEST) {
+  model_registry = loadRegistry("models/prod/registry_TEST", make.default = FALSE)
+  model_job_params = unwrap(getJobPars(reg = model_registry))[algorithm == "logistic_regression",] 
+} else {
+  model_registry = loadRegistry("models/prod/registry", make.default = FALSE)
+  model_job_params = unwrap(getJobPars(reg = model_registry))
+}
 data_list <- readRDS("data/data_storage/data_list.RDS")
 if (!dir.exists("models/prod/resampling")) dir.create("models/prod/resampling")
 
