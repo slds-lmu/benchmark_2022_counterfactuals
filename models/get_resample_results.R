@@ -1,8 +1,15 @@
 library(mlr3)
 library(mlr3tuning)
 
+TEST = FALSE
+
 datal = c("credit_g", "diabetis", "tic_tac_toe", "bank8FM", "hill_valley", "run_or_walk_info")
-modell = c("logistic_regression","neural_network", "ranger", "svm", "xgboost")
+
+if (TEST) {
+  modell = c("logistic_regression")
+} else {
+  modell = c("logistic_regression","neural_network", "ranger", "svm", "xgboost")
+}
 
 resagg = matrix(nrow = length(datal), ncol = length(modell))
 rownames(resagg) = datal
