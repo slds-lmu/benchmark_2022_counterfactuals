@@ -7,7 +7,7 @@ library(ggpubr)
 library(scales)
 source("evaluation/analysis_helper.R")
 
-TEST = TRUE
+TEST = FALSE
 
 # plot objective ranks
 plot_comparison_ranks_with_lines(nummin = 1L)
