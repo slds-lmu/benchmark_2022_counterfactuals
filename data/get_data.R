@@ -3,14 +3,7 @@ set.seed(867853)
 #----
 # 0) Load helper functions & libraries
 #----
-TEST = FALSE
-
-# Setup
-if (TEST) {
-  source("data/def_data_test.R")
-} else {
-  source("data/def_data.R")
-}
+source("data/def_data.R")
 cat("Loaded datasets:", names(data_ids))
 source("data/libs_data.R")
 

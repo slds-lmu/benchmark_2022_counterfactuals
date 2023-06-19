@@ -43,14 +43,15 @@ get_predictor_and_x_interest_pp = function(arg_list, job, data) {
       type = "prob" 
     )
   } else {
-    # if (TEST) {
-    #   model_registry = loadRegistry("models/test/registry_test", make.default = FALSE)
-    # } else {
-      model_registry = loadRegistry("models/prod/registry", make.default = FALSE)
-    # }
+    if (TEST) {
+      models_path = "models/prod/registry_TEST"
+    } else {
+      models_path = "models/prod/registry"
+    }
+    model_registry = loadRegistry(models_path, make.default = FALSE)
     model_job_params = unwrap(getJobPars(reg = model_registry))  
     job_id = model_job_params[problem == prob_name & algorithm == arg_list$model_name]
-    this_model = readRDS(file.path("models/prod/registry", "results", paste0(job_id$job.id, ".rds")))
+    this_model = readRDS(file.path(models_path, "results", paste0(job_id$job.id, ".rds")))
     pred = Predictor$new(this_model, data = data, y = target_name, type = "prob" )
   }
   pred

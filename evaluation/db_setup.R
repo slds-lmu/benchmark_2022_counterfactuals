@@ -7,21 +7,15 @@ library(data.table)
 library(ggplot2)
 
 source("evaluation/helper_db_setup.R")
-# 
-# res = readRDS("evaluation/diabetes_data.R")
-# 
-# con <- dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
-# dbWriteTable(con, "RESULTS", as.data.frame(res), overwrite = TRUE)
-# tbl(con, "RESULTS") %>% collect()
-# dbAppendTable(con, "RESULTS", res)
-# 
-# dbDisconnect(con)
-# 
-# dbSendQuery(con, "DROP TABLE RESULTS")
 
+TEST = FALSE
 
 ## --------------
-reg_dir = "cfactuals/prod/registry/"
+if (TEST) {
+  reg_dir = "cfactuals/prod/registry_TEST"
+} else {
+  reg_dir = "cfactuals/prod/registry/"
+}
 reg = loadRegistry(reg_dir, make.default = FALSE)
 add_results_to_db("diabetis", reg)
 add_results_to_db("tic_tac_toe", reg)
