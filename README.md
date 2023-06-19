@@ -51,3 +51,8 @@ Runtimes:
 2) Models: running `train_models.R` took overall 53 hours spread over 15 CPUS, resample.R took ~ 116 hours.
 3) Counterfals: running `find_counterfactuals.R` took ~ 37 hours spread over 14 CPUS
 4) Evaluation: running `db_setup.R` took a few minutes, `evaluate.R` < 1 minute.
+
+## Test code
+To test the functionality within reasonable time on a regular PC, test functionality is available. 
+By switching `TEST = FALSE` to `TEST = TRUE` at the beginning of `train_models.R`, `resample.R`, `get_resample_results.R`, `find_counterfactuals.R`, `db_setup.R`, `evaluate.R` and `analysis.R`, the results for the diabetis dataset and logistic regression model for the first point of interest can 
+be reproduced for the three available counterfactual explanation methods. 
