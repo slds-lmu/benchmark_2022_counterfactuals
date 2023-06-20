@@ -7,8 +7,7 @@ library(data.table)
 library(ggplot2)
 
 source("evaluation/helper_db_setup.R")
-
-TEST = FALSE
+source("config.R")
 
 ## --------------
 if (TEST) {

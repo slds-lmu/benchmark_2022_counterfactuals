@@ -4,9 +4,9 @@ data.table::setDTthreads(1L)
 #----
 # 0) Load helper functions & libraries
 #----
-TEST = FALSE
 
 # Setup
+source("config.R")
 source("models/libs_models.R")
 source("models/helper_model_wrapper.R")
 source("models/def_model.R")
@@ -79,6 +79,6 @@ if (TEST) {
 } else {
   #### else run all
   submitJobs()
-  waitForJobs()
-  getStatus()
 }
+waitForJobs()
+getStatus()

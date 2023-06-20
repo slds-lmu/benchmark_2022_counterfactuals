@@ -1,7 +1,8 @@
-library(mlr3)
-library(mlr3tuning)
-
-TEST = FALSE
+#----
+# 0) Load helper functions & libraries
+#----
+source("config.R")
+source("models/libs_models.R")
 
 datal = c("credit_g", "diabetis", "tic_tac_toe", "bank8FM", "hill_valley", "run_or_walk_info")
 

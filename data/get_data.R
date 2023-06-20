@@ -3,10 +3,10 @@ set.seed(867853)
 #----
 # 0) Load helper functions & libraries
 #----
+source("config.R")
 source("data/def_data.R")
 cat("Loaded datasets:", names(data_ids))
 source("data/libs_data.R")
-
 
 #----
 # 1) Load data from OpenML, sample and extract x_interests and save data and x_interests as lists in rds files

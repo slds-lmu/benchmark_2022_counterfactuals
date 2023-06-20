@@ -4,9 +4,9 @@ data.table::setDTthreads(1L)
 #----
 # 0) Load helper functions & libraries
 #----
-TEST = FALSE
 
 # Setup
+source("config.R")
 source("cfactuals/libs_cfactuals.R")
 source("cfactuals/helper_cfactuals_wrapper.R")
 source("cfactuals/get_predictor_and_x_interest_pp.R")

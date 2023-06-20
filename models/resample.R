@@ -1,8 +1,9 @@
-library(mlr3)
-library(batchtools)
-library(mlr3tuning)
+#----
+# 0) Load helper functions & libraries
+#----
 
-TEST = FALSE
+source("models/libs_models.R")
+source("config.R")
 
 if (TEST) {
   model_registry = loadRegistry("models/prod/registry_TEST", make.default = FALSE)
@@ -13,6 +14,10 @@ if (TEST) {
 }
 data_list <- readRDS("data/data_storage/data_list.RDS")
 if (!dir.exists("models/prod/resampling")) dir.create("models/prod/resampling")
+
+#---
+# 1) Run resampling to receive performance results
+#---
 
 for (i in model_job_params$job.id) {
   print(i)

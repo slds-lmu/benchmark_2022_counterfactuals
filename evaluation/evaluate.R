@@ -5,8 +5,7 @@ library(DBI)
 library(data.table)
 
 source("evaluation/helper_evaluate.R")
-
-TEST = FALSE
+source("config.R")
 
 # Run db_setup.R first
 
