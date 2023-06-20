@@ -24,6 +24,7 @@ If any of the 5 steps fails, the corresponding `.Rout` of each of the steps can 
 
 ### Run all experiments (although this takes a lot of time)
 To run all experiments, `TEST = FALSE` must be set in `config.R`. Afterwards, `make all` can be called again in the console.
+
 Important: Outside testing mode (`TEST = FALSE` in `config.R`) neural networks are fit to the data, which requires the keras R package and consequently the availability of python on your local machine. 
 
 ### Reproduce figures 
