@@ -29,7 +29,7 @@ Important: Outside testing mode (`TEST = FALSE` in `config.R`) neural networks a
 
 ### Reproduce figures 
 To reproduce the results figures in the manuscript, the following script can be used: `evaluation/reproduce_figures.R`. 
-This file unzips `evaluation/db_evals.zip` to `evaluation/db_evals.db` and calls `evaluation/evaluation.R`. 
+This file unzips `evaluation/db_evals.zip` to `evaluation/db_evals.db` and calls the plotting functions of `evaluation/analysis_helper.R`. 
 The figures are then saved as pdfs in the folder `evaluation/figures`. 
 
 ## Structure
