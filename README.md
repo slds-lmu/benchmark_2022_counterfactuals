@@ -1,5 +1,36 @@
 # Benchmarking repository 
 
+## Reproduce results 
+
+###  Runtimes & system requirements
+Training the model and generating the counterfactuals was conducted in parallel on a computer with a 2.60 GHz Intel(R) Xeon(R) processor, and 32 CPUs.
+Runtimes: 
+1) Get data: < 1 minute
+2) Fit models: running `models/train_models.R` took overall 53 hours spread over 15 CPUS, `models/resample.R` took ~ 116 hours.
+3) Generate counterfactuals: running `cfactuals/find_counterfactuals.R` took ~ 37 hours spread over 14 CPUS
+4) Evaluation: running `evaluation/db_setup.R` took a few minutes, `evaluation/evaluate.R` < 1 minute.
+
+### Test the code in reasonable time
+A Makefile is a available to reproduce results.  
+Since reproducing all experiments takes considerable time, per default only a few experiments are conducted when running any of the make commands. 
+Running `make all` in your console conducts the following steps: 
+1) install-packages: Install all packages required to run the benchmark
+2) get-data: Scrape data from the OpenML platform
+3) train-models: Train a logistic regression model on the data
+4) resample: Get resampling performance results for the logistic regression models
+5) find-counterfactuals: Generate counterfactuals for the diabetis data, logistric regression model and first point of interest, using all three available methods.
+
+If any of the 5 steps fails, the corresponding `.Rout` can be inspected to identify the error. 
+
+### Run all experiments (although this takes a lot of time)
+To run all experiments, `TEST = FALSE` must be set in `config.R`. Afterwards, `make all` can be called again in the console.
+Important: Outside testing mode (`TEST = FALSE` in `config.R`) neural networks are fit to the data, which requires the keras R package and consequently the availability of python on your local machine. 
+
+### Reproduce figures 
+To reproduce the results figures in the manuscript, the following script can be used: `evaluation/reproduce_figures.R`. 
+This file unzips `evaluation/db_evals.zip` and calls `evaluation/evaluation.R`. 
+The figures are then saved as pdfs in the folder `evaluation/figures`. 
+
 ## Structure
 
 ### 1) Data (data/)
@@ -44,15 +75,4 @@ in a sql_lite database (`db_evals.db`) for quick retrieval
 - Main functions: `analysis.R`
 
 
-## Runtimes & system requirements
-Training the model and generating the counterfactuals was conducted in parallel on a computer with a 2.60 GHz Intel(R) Xeon(R) processor, and 32 CPUs.
-Runtimes: 
-1) Data: < 1 minute
-2) Models: running `train_models.R` took overall 53 hours spread over 15 CPUS, resample.R took ~ 116 hours.
-3) Counterfals: running `find_counterfactuals.R` took ~ 37 hours spread over 14 CPUS
-4) Evaluation: running `db_setup.R` took a few minutes, `evaluate.R` < 1 minute.
 
-## Test code
-To test the functionality within reasonable time on a regular PC, test functionality is available. 
-By switching `TEST = FALSE` to `TEST = TRUE` at the beginning of `train_models.R`, `resample.R`, `get_resample_results.R`, `find_counterfactuals.R`, `db_setup.R`, `evaluate.R` and `analysis.R`, the results for the diabetis dataset and logistic regression model for the first point of interest can 
-be reproduced for the three available counterfactual explanation methods. 
