@@ -90,8 +90,12 @@ plot_comparison_ranks_with_lines = function (methods = c("whatif", "nice", "moc"
       geom_line(data = mindata, aes(x = objective, y = value, group = id), alpha = 0.5, lwd = 1, color = "tan4", lty = 1) +
       geom_line(data = sampdata, aes(x = objective, y = value, group=id), alpha=.03, color = "grey20") 
     
-    if (savepdf & !TEST) {
-      fig.path = "evaluation/figures"
+    if (savepdf) {
+      if (TEST) {
+        fig.path = "evaluation/figures_test"
+      } else {
+        fig.path = "evaluation/figures"
+      }
       dir.create(fig.path, showWarnings = FALSE)
       ggsave(filename = file.path(fig.path, paste0(paste("overall", orientation,
         "obj_ranks_with_lines", sep = "_"), ".pdf")), plot = plt, width = 7, height = height) # 5.5, 3.8
@@ -163,8 +167,12 @@ plot_hypervolume = function(methods = c("whatif", "nice", "moc"), log = TRUE, sa
   plt = plt +
     geom_line(aes(x = algorithm, y = value, group=id), alpha=.1)
   
-  if (savepdf & !TEST) {
-    fig.path = "evaluation/figures"
+  if (savepdf) {
+    if (TEST) {
+      fig.path = "evaluation/figures_test"
+    } else {
+      fig.path = "evaluation/figures"
+    }
     dir.create(fig.path, showWarnings = FALSE)
     ggsave(filename = file.path(fig.path, "hv_no_nondom.pdf"), plot = plt, width = 7, height = 4.5) # 5.5, 3.8
   }
@@ -219,8 +227,12 @@ plot_comparison = function(data_set_name, methods = c("whatif", "nice", "moc"), 
       axis.text = element_text(size = 7),
       panel.spacing = unit(2, "pt")
     )
-  if (savepdf & !TEST) {
-    fig.path = "evaluation/figures"
+  if (savepdf) {
+    if (TEST) {
+      fig.path = "evaluation/figures_test"
+    } else {
+      fig.path = "evaluation/figures"
+    }
     dir.create(fig.path, showWarnings = FALSE)
     ggsave(filename = file.path(fig.path, paste0(paste(data_set_name, "obj_all", sep = "_"), ".pdf")), plot = plt, width = 5.5, height = 3.8) # 5.5, 3.8
   }
@@ -294,8 +306,12 @@ plot_speed_comparison = function(type = "n", methods = c("moc", "nice" , "whatif
       axis.text.x = element_text(angle = 60, vjust = 1, hjust=1)
     ) +
     scale_y_continuous(labels = function(x) format(x, big.mark = ",", scientific = FALSE))
-  if (savepdf & !TEST) {
-    fig.path = "evaluation/figures"
+  if (savepdf) {
+    if (TEST) {
+      fig.path = "evaluation/figures_test"
+    } else {
+      fig.path = "evaluation/figures"
+    }
     dir.create(fig.path, showWarnings = FALSE)
     ggsave(filename = file.path(fig.path, paste0(paste(type, "runtime", sep = "_"), ".pdf")), plot = g, width = 3.5, height = 4)
   }
