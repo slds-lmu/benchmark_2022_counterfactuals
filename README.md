@@ -80,4 +80,5 @@ in a sql_lite database (`db_evals.db`) for quick retrieval
 - Creates box plots for comparing the counterfactuals of the different methods w.r.t to several evaluation measures
 - Creates box plots for comparing the speed of the different methods
 - All data are queried from the database `db_evals.db`
+- The resulting figures are saved in `evaluation/figures`
 - Main functions: `analysis.R`
