@@ -27,7 +27,7 @@ To reproduce the results figures in the manuscript, the following script can be 
 This file unzips `evaluation/db_evals.zip` to `evaluation/db_evals.db` and calls the plotting functions of `evaluation/analysis_helper.R`. 
 The figures are then saved as pdfs in the folder `evaluation/figures`. 
 
-### Run all experiments ()
+### Run all experiments 
 :warning: **According to "Runtimes & system requirements", this takes a lot of time**
 
 To run all experiments, `TEST = FALSE` must be set in `config.R`. Afterwards, `make all` can be called again in the console.
