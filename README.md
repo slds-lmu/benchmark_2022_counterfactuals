@@ -43,7 +43,7 @@ Important: Outside testing mode (`TEST = FALSE` in [config.R](config.R)) neural 
 
 - Loads the required datasets from OpenML: https://www.openml.org/
 - For the `hill-valley` dataset, data subsets are created with randomly selected features (10 features and 30 features).
-- Stores the datasets and the `x_interest` as lists in `.rds` files
+- Stores the datasets and the `x_interest` as lists in `.rds` files in the directory `prod`. 
 - Main functions: `get_data.R`
 
 ### 2) Models (models/)
@@ -51,11 +51,13 @@ Important: Outside testing mode (`TEST = FALSE` in [config.R](config.R)) neural 
 - Trains, tunes, and stores 5 models for each dataset: randomForest, xgboost, svm, logistic regression, and neural network
 - Performs nested resampling (5-fold CV for the inner and outer loop) for estimating the classification accuracies of each (tuned) model on each dataset
 - The neural network had to be saved differently due to keras (the autotuner could not be saved as usual; the models need to be stored as `.hdf5` files)
+- The results are saved in a `batchtools` registry in the folder `prod` and subfolder `results`
 - Main functions: `train_models.R`, `resample.R`, `get_resample_results.R`
 
 ### 3) Counterfactuals (cfactuals/)
 
 - Runs the counterfactuals methods for all datasets, `x_interest`, and parameter configurations and stores the counterfactuals as `counterfactuals::Counterfactuals` objects.
+- The results are saved in a `batchtools` registry in the folder `prod` and subfolder `results`
 - Counterfactual methods: WhatIf, NICE, MOC
 - Main functions: `find_counterfactuals.R`
 
