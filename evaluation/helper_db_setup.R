@@ -2,13 +2,11 @@ add_results_to_db = function(data_set_name, reg) {
   reg = loadRegistry(reg_dir, make.default = FALSE)
   job_overview = unwrap(getJobPars(reg = reg))
   jobs_of_this_data_set = job_overview[problem == data_set_name]
+  con = dbConnect(RSQLite::SQLite(), db_file)
   
   if (TEST) {
-    con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals_test.db")
     jobs_of_this_data_set = jobs_of_this_data_set[jobs_of_this_data_set$job.id %in% c(1, 51, 101, 151, 201), ]
-  } else {
-    con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
-  }
+} 
   
   for (job_id in jobs_of_this_data_set$job.id) {
     this_job = job_overview[job.id == job_id]
