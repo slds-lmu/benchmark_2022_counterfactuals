@@ -4,6 +4,7 @@
 
 ###  Runtimes & system requirements
 Training the model and generating the counterfactuals was conducted in parallel on a computer with a 2.60 GHz Intel(R) Xeon(R) processor, and 32 CPUs.
+
 Runtimes: 
 1) Get data: < 1 minute
 2) Fit models: running `models/train_models.R` took overall 53 hours spread over 15 CPUS, `models/resample.R` took ~ 116 hours.
@@ -11,28 +12,31 @@ Runtimes:
 4) Evaluation: running `evaluation/db_setup.R` took a few minutes, `evaluation/evaluate.R` < 1 minute.
 
 ### Test the code in reasonable time
-A Makefile is a available to reproduce results.  
-Since reproducing all experiments takes considerable time, per default only a few experiments are conducted when running any of the make commands. 
+A [Makefile](Makefile) is a available to reproduce results.  
+Since reproducing all experiments takes considerable time, per default only a few experiments are conducted when running any of the make commands (this can be changed by setting `TEST = FALSE` in [config.R](config.R), further details are given in the section "[Run all experiments](#run-all-experiments)" below).
+
 Running `make all` in your console conducts the following steps: 
-1) install-packages: Install all packages required to run the benchmark
-2) get-data: Scrape data from the OpenML platform
-3) train-models: Train a logistic regression model on the data
-4) resample: Get resampling performance results for the logistic regression models
-5) find-counterfactuals: Generate counterfactuals for the diabetis data, logistric regression model and first point of interest, using all three available methods.
+1) install-packages: This runs [libs.R](libs.R), which installs all packages required to run the benchmark
+2) get-data: This runs [data/get_data.R](data/get_data.R), which scrapes data from the OpenML platform
+3) train-models: This runs [models/train_models.R](models/train_models.R), which trains models on the data (in test mode only logistic regression models are fitted)
+4) resample: This runs [models/resample.R](models/resample.R), which computes resampling performance results (in test mode this is only done for the logistic regression models)
+5) find-counterfactuals: This runs [cfactuals/find_counterfactuals.R](cfactuals/find_counterfactuals.R), which generates counterfactuals with the three available methods (in test mode this is only done for the diabetis data, logistric regression model and first point of interest)
 
-If any of the 5 steps fails, the corresponding `.Rout` of each of the steps can be inspected to identify the error. 
-
-### Run all experiments (although this takes a lot of time)
-To run all experiments, `TEST = FALSE` must be set in `config.R`. Afterwards, `make all` can be called again in the console.
-
-Important: Outside testing mode (`TEST = FALSE` in `config.R`) neural networks are fit to the data, which requires the keras R package and consequently the availability of python on your local machine. 
+Outputs of all steps are saved in the corresponding `.Rout` files (`get_data.Rout`, `train_models.Rout`, `find_counterfactuals.Rout`, etc.). If any of the steps fail, they can be inspected to identify the error. 
 
 ### Reproduce figures 
-To reproduce the results figures in the manuscript, the following script can be used: `evaluation/reproduce_figures.R`. 
-This file unzips `evaluation/db_evals.zip` to `evaluation/db_evals.db` and calls the plotting functions of `evaluation/analysis_helper.R`. 
+To reproduce the results figures in the manuscript, the following script can be used: [evaluation/reproduce_figures.R](evaluation/reproduce_figures.R). 
+This file unzips [evaluation/db_evals.zip](evaluation/db_evals.zip) to `evaluation/db_evals.db` and calls the plotting functions of [evaluation/analysis_helper.R](evaluation/analysis_helper.R). 
 The figures are then saved as pdfs in the folder `evaluation/figures`. 
 
-## Structure
+### Run all experiments 
+:warning: **According to "Runtimes & system requirements", this takes a lot of time**
+
+To run all experiments, `TEST = FALSE` must be set in [config.R](config.R). Afterwards, `make all` can be called again in the console.
+
+Important: Outside testing mode (`TEST = FALSE` in [config.R](config.R)) neural networks are fit to the data, which requires the keras R package and consequently the availability of python on your local machine. 
+
+## Structure 
 
 ### 1) Data (data/)
 
@@ -74,6 +78,3 @@ in a sql_lite database (`db_evals.db`) for quick retrieval
 - Creates box plots for comparing the speed of the different methods
 - All data are queried from the database `db_evals.db`
 - Main functions: `analysis.R`
-
-
-
