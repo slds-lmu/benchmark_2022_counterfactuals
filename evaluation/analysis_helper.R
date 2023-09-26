@@ -36,6 +36,7 @@ plot_comparison_ranks_with_lines = function (methods = c("whatif", "nice", "moc"
     
     return(rbind(temp_rank))
   })
+  data_set_names = replace(data_set_names, data_set_names=="diabetis", "diabetes")
   names(aggrres) = data_set_names  
   ll = dplyr::bind_rows(aggrres, .id = "dataset")
   ll$objective = factor(ll$objective, levels = c("dist_x_interest", "no_changed", "dist_train", "rank_nondom"), 
@@ -132,6 +133,7 @@ plot_hypervolume = function(methods = c("whatif", "nice", "moc"), log = TRUE, sa
     
     return(res_hv)
   })
+  data_set_names = replace(data_set_names, data_set_names=="diabetis", "diabetes")
   names(aggrres) = data_set_names  
   ll = dplyr::bind_rows(aggrres, .id = "dataset")
   ll = ll %>% group_by(id_x_interest, model_name, dataset) %>%
