@@ -1,3 +1,54 @@
+# ARF
+countarf_wrapper = function(data, job, instance, ...) {
+  
+  arg_list = list(...)
+  x_interest = readRDS(file.path("data/data_storage/x_interest_list.RDS"))[[job$prob.name]][arg_list$id_x_interest]
+  pred = get_predictor_and_x_interest_pp(arg_list, job, data)
+  pred_x_interest = pred$predict(x_interest)
+  desired_class = names(pred_x_interest)[apply(pred_x_interest, 1L, which.min)]
+  
+  start_time = Sys.time()
+  countarf_classif = CountARFactualClassif$new(pred)
+  cfactuals = countarf_classif$find_counterfactuals(
+    x_interest, desired_class, desired_prob = c(0.5 + sqrt(.Machine$double.eps), 1)
+  )
+  end_time = Sys.time()
+  
+  # save info on runtime and calls to fhat
+  res = get_cf_table(cfactuals, job)
+  attr(res, "runtime") = as.numeric(end_time - start_time)
+  attr(res, "arf_iterations") = countarf_classif$arf_iterations
+  return(res)
+}
+
+# MOCARF
+mocarf_wrapper = function(data, job, instance, ...) {
+  
+  arg_list = list(...)
+  x_interest = readRDS(file.path("data/data_storage/x_interest_list.RDS"))[[job$prob.name]][arg_list$id_x_interest]
+  pred = get_predictor_and_x_interest_pp(arg_list, job, data)
+  pred_x_interest = pred$predict(x_interest)
+  desired_class = names(pred_x_interest)[apply(pred_x_interest, 1L, which.min)]
+  
+  start_time = Sys.time()
+  moc_classif = MOCClassif$new(
+    pred, termination_crit = "genstag", n_generations = 10L, 
+    init_strategy = "icecurve", conditional_mutator = arg_list$conditional_mutator,
+    epsilon = 0L, quiet = TRUE, distance_function = "gower_c"
+  )
+  
+  cfactuals = moc_classif$find_counterfactuals(
+    x_interest, desired_class, desired_prob = c(0.5 + sqrt(.Machine$double.eps), 1)
+  )
+  end_time = Sys.time()
+  
+  # save info on runtime and calls to fhat
+  res = get_cf_table(cfactuals, job)
+  attr(res, "runtime") = as.numeric(end_time - start_time)
+  return(res)
+}
+
+
 # WhatIf
 whatif_wrapper = function(data, job, instance, ...) {
   

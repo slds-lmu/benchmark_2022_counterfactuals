@@ -14,7 +14,7 @@ source("cfactuals/get_predictor_and_x_interest_pp.R")
 if (TEST) {
   source("cfactuals/def_cfactuals_test.R")
 } else {
-  source("cfactuals/def_cfactuals.R")
+  source("cfactuals/def_cfactuals_arf.R")
 }
 
 # Create registry
@@ -45,9 +45,11 @@ for (i in seq_along(data_list)) {
 }
 
 # Add algos
-addAlgorithm(name = "whatif", fun = whatif_wrapper)
-addAlgorithm(name = "nice", fun = nice_wrapper)
-addAlgorithm(name = "moc", fun = moc_wrapper)
+# addAlgorithm(name = "whatif", fun = whatif_wrapper)
+# addAlgorithm(name = "nice", fun = nice_wrapper)
+# addAlgorithm(name = "moc", fun = moc_wrapper)
+addAlgorithm(name = "mocarf", fun = mocarf_wrapper)
+addAlgorithm(name = "countarf", fun = countarf_wrapper)
 
 # Add experiments
 addExperiments(algo.designs = ades)
