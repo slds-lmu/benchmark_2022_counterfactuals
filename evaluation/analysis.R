@@ -7,16 +7,18 @@ library(ggpubr)
 library(scales)
 source("evaluation/analysis_helper.R")
 
+methods = c("moc", "countarf", "mocarf_arf_single", "mocarf_arf_multi")
+
 # plot objective ranks
-plot_comparison_ranks_with_lines(nummin = 1L)
-plot_comparison_ranks_with_lines(orientation = "dataset")
+plot_comparison_ranks_with_lines(nummin = 1L, methods = methods)
+plot_comparison_ranks_with_lines(orientation = "dataset", methods = methods)
 
 # plot hypervolume and no. counterfactuals
-plot_hypervolume(log = TRUE)
+plot_hypervolume(log = TRUE, methods = methods)
 
 # plot speed comparison
-plot_speed_comparison(type = "n", savepdf = TRUE)
-plot_speed_comparison(type = "p", savepdf = TRUE)
+plot_speed_comparison(type = "n", savepdf = TRUE, methods = methods)
+plot_speed_comparison(type = "p", savepdf = TRUE, methods = methods)
 
 # for all methods
 all_methods = c("moc", "nice" , "whatif")

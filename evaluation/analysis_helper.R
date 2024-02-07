@@ -5,9 +5,8 @@ plot_comparison_ranks_with_lines = function (methods = c("whatif", "nice", "moc"
   
   # loop through dataset to compute ranks of objectives, average these over the datapoints
   aggrres = lapply(data_set_names, function(datanam) {
-    con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
-    res = tbl(con, paste0(datanam, "_EVAL")) %>% collect()
-    DBI::dbDisconnect(con)
+   
+    res = get_results(datanam)
     
     temp = res %>%
       select(-dist_target) %>%
@@ -15,7 +14,7 @@ plot_comparison_ranks_with_lines = function (methods = c("whatif", "nice", "moc"
       mutate(model_name = recode(model_name, logistic_regression = "logreg", neural_network = "neuralnet")) %>% 
       pivot_longer(c(dist_x_interest:dist_train), names_to = "objective") %>% 
       mutate(objective = factor(objective, levels = c("dist_x_interest", "no_changed", "dist_train"))) %>% 
-      select(id, id_x_interest, model_name, algorithm, objective, value)  %>% 
+      select(id, id_x_interest, model_name, algorithm, objective, value, conditional_sampler)  %>% 
       filter(algorithm %in% methods)
     
     # calculate ranks per objective
@@ -58,7 +57,7 @@ plot_comparison_ranks_with_lines = function (methods = c("whatif", "nice", "moc"
     height = 7.5
   }
   mindata = left_join(x = minid, y = ll, by = c("model_name", "algorithm", "id", "dataset"))
-  n_colors = length(methods)
+  n_colors = length(unique(ll$algorithm))
   plt = plt + 
     scale_fill_manual(values = RColorBrewer::brewer.pal(n = n_colors, name = "Paired")) +
     theme_bw() +
@@ -68,7 +67,7 @@ plot_comparison_ranks_with_lines = function (methods = c("whatif", "nice", "moc"
       axis.text.y = element_text(size = 8),
       panel.spacing = unit(2, "pt")
     ) 
-  n_sample = 2000
+  n_sample = 100
   sampdata = ll %>% 
       group_by(model_name, objective, algorithm) %>%
       sample_n(min(n(), n_sample)) %>%
@@ -85,7 +84,7 @@ plot_comparison_ranks_with_lines = function (methods = c("whatif", "nice", "moc"
       fig.path = "evaluation/figures"
       dir.create(fig.path, showWarnings = FALSE)
       ggsave(filename = file.path(fig.path, paste0(paste("overall", orientation,
-        "obj_ranks_with_lines", sep = "_"), ".pdf")), plot = plt, width = 7, height = height) # 5.5, 3.8
+        "obj_ranks_with_lines", sep = "_"), ".png")), dpi = 200, plot = plt, width = 10, height = height) # 5.5, 3.8
     }
     
     return(plt)
@@ -95,10 +94,8 @@ plot_comparison_ranks_with_lines = function (methods = c("whatif", "nice", "moc"
 plot_hypervolume = function(methods = c("whatif", "nice", "moc"), log = TRUE, savepdf = TRUE) {
   data_set_names = c("credit_g", "diabetis", "tic_tac_toe", "bank8FM", "hill_valley", "run_or_walk_info")
   aggrres = lapply(data_set_names, function(datanam) {
-    con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
-    res = tbl(con, paste0(datanam, "_EVAL")) %>% collect()
-    DBI::dbDisconnect(con)
-    
+   
+    res = get_results(datanam)
     
     #  res$hypervolume = res$dom_hv
     
@@ -148,7 +145,8 @@ plot_hypervolume = function(methods = c("whatif", "nice", "moc"), log = TRUE, sa
   if (savepdf) {
     fig.path = "evaluation/figures"
     dir.create(fig.path, showWarnings = FALSE)
-    ggsave(filename = file.path(fig.path, "hv_no_nondom.pdf"), plot = plt, width = 7, height = 4.5) # 5.5, 3.8
+    ggsave(filename = file.path(fig.path, "hv_no_nondom.png"), dpi = 200,
+      plot = plt, width = 7, height = 4.5) # 5.5, 3.8
   }
   return(plt)
 }
@@ -156,9 +154,7 @@ plot_hypervolume = function(methods = c("whatif", "nice", "moc"), log = TRUE, sa
 
 plot_comparison = function(data_set_name, methods = c("whatif", "nice", "moc"), savepdf = TRUE) {
   
-  con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
-  res = tbl(con, paste0(data_set_name, "_EVAL")) %>% collect()
-  DBI::dbDisconnect(con)
+  res = get_results(data_set_name)
   
   res_long = res %>%
     select(-dist_target) %>%
@@ -200,7 +196,7 @@ plot_comparison = function(data_set_name, methods = c("whatif", "nice", "moc"), 
   if (savepdf) {
     fig.path = "evaluation/figures"
     dir.create(fig.path, showWarnings = FALSE)
-    ggsave(filename = file.path(fig.path, paste0(paste(data_set_name, "obj_all", sep = "_"), ".pdf")), plot = plt, width = 5.5, height = 3.8) # 5.5, 3.8
+    ggsave(filename = file.path(fig.path, paste0(paste(data_set_name, "obj_all", sep = "_"), ".png")), dpi = 200, plot = plt, width = 5.5, height = 3.8) # 5.5, 3.8
   }
   return(plt)
 }
@@ -213,10 +209,12 @@ speed_comparison = function(type = "n", methods = c("moc", "nice" , "whatif")) {
     data_names = c("hill_valley", "hill_valley_10", "hill_valley_30")
   }
   
-  con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
+  con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals_arf.db")
   res = list()
   for (data_name in data_names) {
-    res[[data_name]] = tbl(con, paste0(data_name, "_EVAL")) %>% collect() %>% 
+    res_dat = get_results(data_name)
+    
+    res[[data_name]] = res_dat %>%
       filter(algorithm %in% methods) %>% 
       select(id_x_interest, model_name, time_running, algorithm, algorithm) %>% 
       mutate(data_name = data_name)
@@ -255,7 +253,7 @@ plot_speed_comparison = function(type = "n", methods = c("moc", "nice" , "whatif
   savepdf = FALSE) {
   df_res = speed_comparison(type, methods)
   n_colors = length(methods)
-  browser()
+
   # df_res %>% group_by(data_name, algorithm) %>% summarise_at(vars(-id_x_interest, -model_name),  funs(mean(., na.rm=TRUE)))
   g = ggplot(df_res) +
     geom_boxplot(aes(x = algorithm, y = time_running, fill = algorithm), show.legend = FALSE) +
@@ -276,7 +274,7 @@ plot_speed_comparison = function(type = "n", methods = c("moc", "nice" , "whatif
   if (savepdf) {
     fig.path = "evaluation/figures"
     dir.create(fig.path, showWarnings = FALSE)
-    ggsave(filename = file.path(fig.path, paste0(paste(type, "runtime", sep = "_"), ".pdf")), plot = g, width = 3.5, height = 4)
+    ggsave(filename = file.path(fig.path, paste0(paste(type, "runtime", sep = "_"), ".png")), dpi = 200,  plot = g, width = 3.5, height = 4)
   }
   g
   
@@ -284,12 +282,13 @@ plot_speed_comparison = function(type = "n", methods = c("moc", "nice" , "whatif
 
 check_cfexp_generated = function(data_set_name, models = NULL) {
   
-  con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
+  con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals_arf.db")
   res = list()
   
   for (data_name in c("diabetis", "tic_tac_toe", "credit_g", "run_or_walk_info", "hill_valley", "bank8FM")) {
     if (data_name == "overall") next
-    res_df = tbl(con, paste0(data_name, "_EVAL")) %>% collect() %>% 
+    
+    res_df = get_results(data_name) %>%
       select(id_x_interest, algorithm, model_name) %>% 
       distinct() %>% 
       group_by(algorithm, model_name) %>% 
@@ -366,4 +365,25 @@ shift_legend_bottom_right = function(p) {
 }
 
 
+
+get_results = function(datanam) {
+  con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals_arf.db")
+  res = tbl(con, paste0(datanam, "_EVAL")) %>% collect()
+  DBI::dbDisconnect(con)
+  res$nondom = NA
+  res$dom_hv = NA
+  res$optimization = NA
+  
+  con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
+  resother = tbl(con, paste0(datanam, "_EVAL")) %>% collect()
+  DBI::dbDisconnect(con)
+  resother$conditional_sampler = NA
+  
+  res = rbind(res, resother)
+  
+  res$algorithm = ifelse(res$algorithm == "mocarf", 
+    paste(res$algorithm, res$conditional_sampler, sep = "_"), res$algorithm)
+  
+  res
+}
 
