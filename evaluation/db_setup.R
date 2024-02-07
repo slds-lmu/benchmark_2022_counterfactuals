@@ -21,7 +21,7 @@ source("evaluation/helper_db_setup.R")
 
 
 ## --------------
-reg_dir = "cfactuals/prod/registry/"
+reg_dir = "cfactuals/prod/registry_arf/"
 reg = loadRegistry(reg_dir, make.default = FALSE)
 add_results_to_db("diabetis", reg)
 add_results_to_db("tic_tac_toe", reg)

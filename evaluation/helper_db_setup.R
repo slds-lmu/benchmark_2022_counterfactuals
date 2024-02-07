@@ -3,7 +3,7 @@ add_results_to_db = function(data_set_name, reg) {
   job_overview = unwrap(getJobPars(reg = reg))
   jobs_of_this_data_set = job_overview[problem == data_set_name]
   
-  con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
+  con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals_arf.db")
   
   for (job_id in jobs_of_this_data_set$job.id) {
     this_job = job_overview[job.id == job_id]
