@@ -99,7 +99,7 @@ plot_comparison_ranks_with_lines = function (methods = c("whatif", "nice", "moc"
       }
       dir.create(fig.path, showWarnings = FALSE)
       ggsave(filename = file.path(fig.path, paste0(paste("overall", orientation,
-        "obj_ranks_with_lines", sep = "_"), ".pdf")), plot = plt, width = 7, height = height) # 5.5, 3.8
+        "obj_ranks_with_lines", sep = "_"), ".png")), plot = plt, width = 7, height = height, dpi = 200) # 5.5, 3.8
     }
     
     return(plt)
@@ -176,7 +176,7 @@ plot_hypervolume = function(methods = c("whatif", "nice", "moc"), log = TRUE, sa
       fig.path = "evaluation/figures"
     }
     dir.create(fig.path, showWarnings = FALSE)
-    ggsave(filename = file.path(fig.path, "hv_no_nondom.pdf"), plot = plt, width = 7, height = 4.5) # 5.5, 3.8
+    ggsave(filename = file.path(fig.path, "hv_no_nondom.png"), plot = plt, width = 7, height = 4.5, dpi = 200) # 5.5, 3.8
   }
   return(plt)
 }
@@ -236,7 +236,7 @@ plot_comparison = function(data_set_name, methods = c("whatif", "nice", "moc"), 
       fig.path = "evaluation/figures"
     }
     dir.create(fig.path, showWarnings = FALSE)
-    ggsave(filename = file.path(fig.path, paste0(paste(data_set_name, "obj_all", sep = "_"), ".pdf")), plot = plt, width = 5.5, height = 3.8) # 5.5, 3.8
+    ggsave(filename = file.path(fig.path, paste0(paste(data_set_name, "obj_all", sep = "_"), ".png")), plot = plt, width = 5.5, height = 3.8, dpi = 200) # 5.5, 3.8
   }
   return(plt)
 }
@@ -315,7 +315,7 @@ plot_speed_comparison = function(type = "n", methods = c("moc", "nice" , "whatif
       fig.path = "evaluation/figures"
     }
     dir.create(fig.path, showWarnings = FALSE)
-    ggsave(filename = file.path(fig.path, paste0(paste(type, "runtime", sep = "_"), ".pdf")), plot = g, width = 3.5, height = 4)
+    ggsave(filename = file.path(fig.path, paste0(paste(type, "runtime", sep = "_"), ".png")), plot = g, width = 3.5, height = 4, dpi = 200)
   }
   g
   
