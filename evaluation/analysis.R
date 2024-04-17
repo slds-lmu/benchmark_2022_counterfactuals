@@ -15,8 +15,10 @@ plot_comparison_ranks_with_lines(orientation = "dataset")
 plot_hypervolume(log = TRUE)
 
 # plot speed comparison
-plot_speed_comparison(type = "n", savepdf = TRUE)
-plot_speed_comparison(type = "p", savepdf = TRUE)
+load("evaluation/df_n.rda")
+load("evaluation/df_p.rda")
+plot_speed_comparison(df_n, type = "n", savepdf = TRUE, log = FALSE)
+plot_speed_comparison(df_p, type = "p", savepdf = TRUE, log = TRUE)
 
 # for all methods
 all_methods = c("moc", "nice" , "whatif")

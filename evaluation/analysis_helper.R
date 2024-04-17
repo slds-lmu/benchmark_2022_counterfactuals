@@ -243,9 +243,8 @@ speed_comparison = function(type = "n", methods = c("moc", "nice" , "whatif")) {
   df_res
 }
 
-plot_speed_comparison = function(type = "n", methods = c("moc", "nice" , "whatif"), 
+plot_speed_comparison = function(df_res, type = "n", methods = c("moc", "nice" , "whatif"), log = FALSE, 
   savepdf = FALSE) {
-  df_res = speed_comparison(type, methods)
   n_colors = length(methods)
   # df_res %>% group_by(data_name, algorithm) %>% summarise_at(vars(-id_x_interest, -model_name),  funs(mean(., na.rm=TRUE)))
   g = ggplot(df_res) +
@@ -261,9 +260,13 @@ plot_speed_comparison = function(type = "n", methods = c("moc", "nice" , "whatif
       strip.text = element_text(size = 8, margin = margin(t = 2.5, r = 2.5, b = 2.5, l = 2.5, unit = "pt")), 
       axis.title = element_text(size = 9),
       plot.margin = margin(t = 1, r = 0, b = 0, l = 0, unit = "pt"), 
-      axis.text.x = element_text(angle = 60, vjust = 1, hjust=1)
-    ) +
-    scale_y_continuous(labels = function(x) format(x, big.mark = ",", scientific = FALSE))
+      axis.text.x = element_text(angle = 60, vjust = 1, hjust=1))
+    if (log) {
+      g = g + scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x, n = 5))
+    } else {
+      g = g + scale_y_continuous(labels = function(x) {
+        format(x, big.mark = ",", scientific = FALSE)})
+    }
   if (savepdf) {
     fig.path = "evaluation/figures"
     dir.create(fig.path, showWarnings = FALSE)
