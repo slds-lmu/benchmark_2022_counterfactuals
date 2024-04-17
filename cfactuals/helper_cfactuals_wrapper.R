@@ -7,16 +7,16 @@ whatif_wrapper = function(data, job, instance, ...) {
   pred_x_interest = pred$predict(x_interest)
   desired_class = names(pred_x_interest)[apply(pred_x_interest, 1L, which.min)]
   
-  start_time = Sys.time()
+  start_time = tic()
   whatif_classif = WhatIfClassif$new(pred, n_counterfactuals = 10L, distance_function = "gower_c")
   cfactuals = whatif_classif$find_counterfactuals(
     x_interest, desired_class, desired_prob = c(0.5 + sqrt(.Machine$double.eps), 1)
   )
-  end_time = Sys.time()
+   end_time = toc()
   
   # save info on runtime and calls to fhat
   res = get_cf_table(cfactuals, job)
-  attr(res, "runtime") = as.numeric(end_time - start_time)
+  attr(res, "runtime") = as.numeric(end_time$toc - end_time$tic)
   return(res)
 }
 
@@ -29,17 +29,17 @@ nice_wrapper = function(data, job, instance, ...) {
   pred_x_interest = pred$predict(x_interest)
   desired_class = names(pred_x_interest)[apply(pred_x_interest, 1L, which.min)]
   
-  start_time = Sys.time()
+  start_time = tic()
   nice_classif = NICEClassif$new(pred, optimization = arg_list$optimization,
                                  return_multiple = TRUE, finish_early = FALSE, distance_function = "gower_c")
   cfactuals = nice_classif$find_counterfactuals(
     x_interest, desired_class, desired_prob = c(0.5 + sqrt(.Machine$double.eps), 1)
   )
-  end_time = Sys.time()
+   end_time = toc()
   
   # save info on runtime and calls to fhat
   res = get_cf_table(cfactuals, job)
-  attr(res, "runtime") = as.numeric(end_time - start_time)
+  attr(res, "runtime") = as.numeric(end_time$toc - end_time$tic)
   return(res)
 }
 
@@ -52,7 +52,7 @@ moc_wrapper = function(data, job, instance, ...) {
   pred_x_interest = pred$predict(x_interest)
   desired_class = names(pred_x_interest)[apply(pred_x_interest, 1L, which.min)]
   
-  start_time = Sys.time()
+  start_time = tic()
   moc_classif = MOCClassif$new(
     pred, termination_crit = "genstag", n_generations = 10L, 
     init_strategy = "icecurve", use_conditional_mutator = FALSE,
@@ -62,11 +62,11 @@ moc_wrapper = function(data, job, instance, ...) {
   cfactuals = moc_classif$find_counterfactuals(
     x_interest, desired_class, desired_prob = c(0.5 + sqrt(.Machine$double.eps), 1)
   )
-  end_time = Sys.time()
+   end_time = toc()
   
   # save info on runtime and calls to fhat
   res = get_cf_table(cfactuals, job)
-  attr(res, "runtime") = as.numeric(end_time - start_time)
+  attr(res, "runtime") = as.numeric(end_time$toc - end_time$tic)
   return(res)
 }
 

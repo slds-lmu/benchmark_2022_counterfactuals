@@ -1,5 +1,5 @@
 plot_comparison_ranks_with_lines = function (methods = c("whatif", "nice", "moc"), orientation = "model", nummin = 1L, savepdf = TRUE) {
-
+  
   if (TEST) {
     data_set_names = c("diabetis")
   } else {
@@ -80,29 +80,29 @@ plot_comparison_ranks_with_lines = function (methods = c("whatif", "nice", "moc"
     ) 
   n_sample = 2000
   sampdata = ll %>% 
-      group_by(model_name, objective, algorithm) %>%
-      sample_n(min(n(), n_sample)) %>%
-      # slice_sample(n = n_sample) %>% 
-      ungroup() 
+    group_by(model_name, objective, algorithm) %>%
+    sample_n(min(n(), n_sample)) %>%
+    # slice_sample(n = n_sample) %>% 
+    ungroup() 
   # sampdata %>% group_by(model_name, objective, algorithm) %>%
   #   summarise(n = n())
   colorlines = "tan4"
-    plt = plt + 
-      geom_line(data = mindata, aes(x = objective, y = value, group = id), alpha = 0.5, lwd = 1, color = "tan4", lty = 1) +
-      geom_line(data = sampdata, aes(x = objective, y = value, group=id), alpha=.03, color = "grey20") 
-    
-    if (savepdf) {
-      if (TEST) {
-        fig.path = "evaluation/figures_test"
-      } else {
-        fig.path = "evaluation/figures"
-      }
-      dir.create(fig.path, showWarnings = FALSE)
-      ggsave(filename = file.path(fig.path, paste0(paste("overall", orientation,
-        "obj_ranks_with_lines", sep = "_"), ".png")), plot = plt, width = 7, height = height, dpi = 200) # 5.5, 3.8
+  plt = plt + 
+    geom_line(data = mindata, aes(x = objective, y = value, group = id), alpha = 0.5, lwd = 1, color = "tan4", lty = 1) +
+    geom_line(data = sampdata, aes(x = objective, y = value, group=id), alpha=.03, color = "grey20") 
+  
+  if (savepdf) {
+    if (TEST) {
+      fig.path = "evaluation/figures_test"
+    } else {
+      fig.path = "evaluation/figures"
     }
-    
-    return(plt)
+    dir.create(fig.path, showWarnings = FALSE)
+    ggsave(filename = file.path(fig.path, paste0(paste("overall", orientation,
+      "obj_ranks_with_lines", sep = "_"), ".png")), plot = plt, width = 7, height = height, dpi = 200) # 5.5, 3.8
+  }
+  
+  return(plt)
 }
 
 
@@ -198,7 +198,7 @@ plot_comparison = function(data_set_name, methods = c("whatif", "nice", "moc"), 
     pivot_longer(c(dist_x_interest:dist_train, no_nondom), names_to = "objective") %>% 
     mutate(objective = factor(objective, levels = c("dist_x_interest", "no_changed", "dist_train", "no_nondom"), 
       labels = c("o[proxi]", "o[sparse]", "o[plaus]", "no.~nondom"))) 
-
+  
   
   res_n = res_long %>% filter(objective == "no_nondom") %>% 
     group_by(id_x_interest, model_name, algorithm) %>%
@@ -210,11 +210,11 @@ plot_comparison = function(data_set_name, methods = c("whatif", "nice", "moc"), 
   if (!is.null(methods)) {
     res_long <- res_long %>% filter(algorithm %in% methods)
   }
- 
-   if (data_set_name == "diabetis") data_set_name = "diabetes"
   
-   n_colors = length(unique(res_long$algorithm))
-
+  if (data_set_name == "diabetis") data_set_name = "diabetes"
+  
+  n_colors = length(unique(res_long$algorithm))
+  
   plt = ggplot(res_long) +
     geom_boxplot(aes(x = algorithm, y = value, fill = algorithm), show.legend = FALSE) +
     scale_x_discrete(limits = rev) +
@@ -287,7 +287,7 @@ speed_comparison = function(type = "n", methods = c("moc", "nice" , "whatif")) {
   df_res
 }
 
-plot_speed_comparison = function(type = "n", methods = c("moc", "nice" , "whatif"), 
+plot_speed_comparison = function(type = "n", methods = c("moc", "nice" , "whatif"), log = FALSE, 
   savepdf = FALSE) {
   df_res = speed_comparison(type, methods)
   n_colors = length(methods)
@@ -305,9 +305,13 @@ plot_speed_comparison = function(type = "n", methods = c("moc", "nice" , "whatif
       strip.text = element_text(size = 8, margin = margin(t = 2.5, r = 2.5, b = 2.5, l = 2.5, unit = "pt")), 
       axis.title = element_text(size = 9),
       plot.margin = margin(t = 1, r = 0, b = 0, l = 0, unit = "pt"), 
-      axis.text.x = element_text(angle = 60, vjust = 1, hjust=1)
-    ) +
-    scale_y_continuous(labels = function(x) format(x, big.mark = ",", scientific = FALSE))
+      axis.text.x = element_text(angle = 60, vjust = 1, hjust = 1))
+    if (log) {
+      g = g + scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x, n = 5))
+    } else {
+      g = g + scale_y_continuous(labels = function(x) {
+        format(x, big.mark = ",", scientific = FALSE)})
+    }
   if (savepdf) {
     if (TEST) {
       fig.path = "evaluation/figures_test"
