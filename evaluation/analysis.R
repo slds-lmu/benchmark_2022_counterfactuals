@@ -17,8 +17,8 @@ plot_hypervolume(log = TRUE)
 
 if (!TEST) {
 # plot speed comparison
-  plot_speed_comparison(df_n, type = "n", savepdf = TRUE, log = FALSE)
-  plot_speed_comparison(df_p, type = "p", savepdf = TRUE, log = TRUE)
+  plot_speed_comparison(type = "n", savepdf = TRUE, log = FALSE)
+  plot_speed_comparison(type = "p", savepdf = TRUE, log = TRUE)
 }
 
 # for all methods

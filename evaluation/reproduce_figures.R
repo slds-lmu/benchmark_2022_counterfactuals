@@ -27,7 +27,7 @@ plot_hypervolume(log = TRUE)
 
 # plot speed comparison
 plot_speed_comparison(type = "n", savepdf = TRUE)
-plot_speed_comparison(type = "p", savepdf = TRUE)
+plot_speed_comparison(type = "p", savepdf = TRUE, log = TRUE)
 
 # b) Appendix
 all_methods = c("moc", "nice" , "whatif")
