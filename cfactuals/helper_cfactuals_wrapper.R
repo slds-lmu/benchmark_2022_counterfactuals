@@ -29,6 +29,10 @@ nice_wrapper = function(data, job, instance, ...) {
   pred_x_interest = pred$predict(x_interest)
   desired_class = names(pred_x_interest)[apply(pred_x_interest, 1L, which.min)]
   
+  if (TEST & arg_list$optimization == "plausibility") {
+    arg_list$optimization = "sparsity"
+  }
+  
   start_time = tic()
   nice_classif = NICEClassif$new(pred, optimization = arg_list$optimization,
                                  return_multiple = TRUE, finish_early = FALSE, distance_function = "gower_c")

@@ -1,4 +1,3 @@
-rm(list = ls())
 set.seed(867853)
 #----
 # 0) Load helper functions & libraries

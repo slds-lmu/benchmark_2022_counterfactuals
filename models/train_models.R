@@ -1,4 +1,3 @@
-rm(list = ls())
 set.seed(867854)
 data.table::setDTthreads(1L)
 #----

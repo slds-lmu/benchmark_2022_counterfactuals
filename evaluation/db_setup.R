@@ -1,4 +1,5 @@
 library(DBI)
+library(RSQLite)
 library(dplyr)
 library(tidyr)
 library(batchtools)

@@ -12,7 +12,7 @@ packages = c(
   ### counterfactuals: make find-counterfactuals
   "counterfactuals", "iml", "data.table",
   ### evaluation: make plot-results 
-  "magrittr", "ggplot2", "tidyverse", "DBI", "dplyr", "tidyr", "batchtools", 
+  "magrittr", "ggplot2", "tidyverse", "DBI", "RSQLite", "dplyr", "tidyr", "batchtools", 
   "data.table", "broom", "ggpubr", "scales"
 )
 
