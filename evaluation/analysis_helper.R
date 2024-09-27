@@ -67,7 +67,8 @@ plot_comparison_ranks_with_lines = function (methods = c("whatif", "nice", "moc"
     plt = plt + facet_grid(dataset ~ algorithm, scales = "free")
     height = 7.5
   }
-  mindata = left_join(x = minid, y = ll, by = c("model_name", "algorithm", "id", "dataset"))
+  mindata = left_join(x = minid, y = ll, by = c("model_name", "algorithm", "id", "dataset"), 
+                      relationship = "many-to-many")
   n_colors = length(methods)
   plt = plt + 
     scale_fill_manual(values = RColorBrewer::brewer.pal(n = n_colors, name = "Paired")) +
