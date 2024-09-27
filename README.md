@@ -26,7 +26,7 @@ Running `make all` in your console conducts the following steps:
 Outputs of all steps are saved in the corresponding `.Rout` files (`get_data.Rout`, `train_models.Rout`, `find_counterfactuals.Rout`, etc.). If any of the steps fail, they can be inspected to identify the error. 
 
 ### Reproduce figures 
-To reproduce the results figures in the manuscript, the following script can be used: [evaluation/reproduce_figures.R](evaluation/reproduce_figures.R). 
+To reproduce the results figures in the manuscript, the following script can be used: [reproduce_figures.R](reproduce_figures.R). 
 This file unzips [evaluation/db_evals.zip](evaluation/db_evals.zip) to `evaluation/db_evals.db` and calls the plotting functions of [evaluation/analysis_helper.R](evaluation/analysis_helper.R). 
 The figures are then saved as pdfs in the folder `evaluation/figures`. 
 
